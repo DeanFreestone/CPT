@@ -71,10 +71,13 @@ for n=StartSample:EndSample
         axis square
     end
     
+    % an arc going backward in time (~half an arc)
     x_previous = x(n-PointsFromCenter:n-1);                                         % note: current sample not include! take previous estimates corresponding to segment size
-    Hx_previous = Hx(n-PointsFromCenter:n-1);                                     % this is used for the relative distance mismatch
-      
-    [x0_temp Hx0_temp r_temp phi_temp x_temp Hx_temp M_temp e d Norm] =  Find_All_Circle_Parameters_And_Tangents(MaxPoints, InitialPoints, PointsStep, y_s_all, Hy_s_all, x_previous, Hx_previous);
+    Hx_previous = Hx(n-PointsFromCenter:n-1);                                     % this is used for the distance mismatch
+    
+    % here we calculate the candidates and the cost functions
+    [x0_temp Hx0_temp r_temp phi_temp x_temp Hx_temp M_temp e d Norm] =...
+        Find_All_Circle_Parameters_And_Tangents(MaxPoints, InitialPoints, PointsStep, y_s_all, Hy_s_all, x_previous, Hx_previous);
     
     if PlotMode == 1
         hold on
@@ -129,6 +132,9 @@ for n=StartSample:EndSample
             PhaseJumpThresh = -0.75*pi;        % this is used with the condtion that the phase difference phi(n)-phi(n-1) is positive. It can also be less than this consant to account for 2pi phase jumps.
 
 %             Indexes_From_p1 = ((p1<PhaseForwardThresh) & (p1 > 0)) | (p1<PhaseJumpThresh);
+
+            % need to unwrap phase here
+
             Indexes_From_p1 = ((p1<PhaseForwardThresh) & (p1 >= 0)) | (p1<PhaseJumpThresh);
             Indexes_From_p1_and_p2 = (((p1<PhaseForwardThresh) & (p1 >= 0)) | (p1<PhaseJumpThresh)) & (p2>0);
 
