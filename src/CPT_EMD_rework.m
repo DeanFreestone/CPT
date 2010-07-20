@@ -10,7 +10,7 @@
 % phi_unwrapped = with NaNs
 
 function [C r_approx IF_interp phi_interp phi_unwrapped m_star, M, res,x0,Hx0] = ...
-    CPT_EMD_rework(N_imfs, y, InitialPoints, UpperLimit, PointsStep, Ts, PlotMode)
+    CPT_EMD(N_imfs, y, InitialPoints, UpperLimit, PointsStep, Ts, PlotMode)
 
 [NCols NSamples] = size(y);
 if NSamples < NCols
@@ -38,7 +38,7 @@ for n=1:N_imfs
         UpperLimit = UpperLimit;
     end
         
-    [IF_interp(n,:), phi_interp(n,:), phi_unwrapped(n,:), x, Hx, r, phi, x0, Hx0, m_star(n,:), M(n,:)] = cpt_rework(yy,InitialPoints,UpperLimit, PointsStep, Ts, PlotMode);
+    [IF_interp(n,:), phi_interp(n,:), phi_unwrapped(n,:), x, Hx, r, phi, x0, Hx0, m_star(n,:), M(n,:)] = cpt(yy,InitialPoints,UpperLimit, PointsStep, Ts, PlotMode,f_max);
     
     % find the detrending line
     cos_phi = cos(phi_interp(n,:));

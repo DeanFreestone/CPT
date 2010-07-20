@@ -1,10 +1,10 @@
 
 function [x0_temp Hx0_temp r_temp phi_temp x_temp Hx_temp M_temp e d Norm] =  Find_All_Circle_Parameters_And_Tangents(MaxPoints, InitialPoints, PointsStep, y_s_all, Hy_s_all, x_previous, Hx_previous)
 
-    center = floor(length(y_s_all)/2) + 1;              % length of y_s_all should be odd so there is a centre
+    center = floor(length(y_s_all)/2) + 1;              % length of y_s_all is odd so there is a centre
 
-    PointsFromCenterOuter = floor(MaxPoints/2);
-    PointsFromCenterInner = floor(InitialPoints/2);
+    PointsFromCenterOuter = floor(MaxPoints/2);         % should be m_{max}
+    PointsFromCenterInner = floor(InitialPoints/2);         % m_{min}
 
     NPoints = floor((PointsFromCenterOuter - PointsFromCenterInner)/PointsStep) + 1;          % how many combos we have to try
 

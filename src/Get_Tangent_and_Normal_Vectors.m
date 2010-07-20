@@ -16,14 +16,9 @@
 function [Simple_Tangent Simple_Norm] = Get_Tangent_and_Normal_Vectors(Samples_For_Tangent,y_s_all, Hy_s_all)
 
     center = floor(length(y_s_all)/2) + 1;              % length of y_s_all should be odd so there is a centre
-    
-    Samples_Either_Side = floor(Samples_For_Tangent/2);
-
-    
-    
+    Samples_Either_Side = floor(Samples_For_Tangent/2);   
     Simple_Tangent = [y_s_all(center + Samples_Either_Side) - y_s_all(center - Samples_Either_Side)...
-    Hy_s_all(center + Samples_Either_Side) - Hy_s_all(center - Samples_Either_Side)];
-    
+    Hy_s_all(center + Samples_Either_Side) - Hy_s_all(center - Samples_Either_Side)];    
     Simple_Norm = [Simple_Tangent(2); -Simple_Tangent(1)];
 
 end

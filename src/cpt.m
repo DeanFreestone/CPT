@@ -129,9 +129,11 @@ for n=StartSample:EndSample
         else
             
             [p1 p2] = Calculate_Priors(r_temp, phi_temp, r(last_good_mapping_index), phi(last_good_mapping_index));
+            % p1 is the difference between consectutive phases
+            % p2 is the amplitude-phase relationship (should be  > 0)
             
             p = n-last_good_mapping_index;                  % this is the number of samples back for the last good estimate.
-            beta_p = p*pi/rho;
+            beta_p = 2*p*pi/rho;
             alpha_p = beta_p - 2*pi;
             
 %             Indexes_From_p1 = ((p1<PhaseForwardThresh) & (p1 > 0)) | (p1<PhaseJumpThresh);
