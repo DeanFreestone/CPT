@@ -260,7 +260,7 @@ By estimating a circle that best fits the data segment in a least squares sense,
 \end{figure}
 
 \subsection{Detecting Invalid Parameters}\label{sect:DetectingInvalidParameters}
-To accurately approximate the the phase-plane trajectory of a nonstationary signal by an arc of a circle it is desirable to use small segments of data. However, when using fewer points and smaller arc lengths, noise has a larger effect on the result. Therefore, a series of checks is used to prevent errors. 
+To accurately approximate the the phase-plane trajectory of a nonstationary signal by an arc of a circle, it is desirable to use small segments of data. However, when using fewer points and smaller arc lengths, noise has a larger effect on the result. Therefore, a series of checks is used to prevent errors. 
 \subsubsection{Incorrect Circle Center Identification}
 Any bounded oscillatory signal will have a closed trajectory in the phase-plane. Therefore, the fitted circle centers (signal offsets) should be confined to one side of the arc. However, errors can occur when fitting circles to noisy data with small arc lengths. A check to prevent circle centers being mapped to the incorrect side is to use the local tangent of the signal as a separating hyper-plane. If candidate circle centers are on the incorrect side of the tangent, they are rejected. The signal in the phase-plane in vector form is described as
 \begin{equation}
@@ -270,7 +270,7 @@ The direction of the tangent of the phase-plane trajectory of the signal is appr
 \begin{equation}
 	\mathbf{z}(n) = \mathbf{p}_y(n + m_{min}) - \mathbf{p}_y(n - m_{min}),
 \end{equation}
-where $m_{min}$ corresponds to indexes of the smallest segment size within the range of segment sizes from Eq.\ref{eq:DataSegment}. To classify incorrect centers the normal vector of the tangent is found using a 90 degree rotation by
+where $m_{min}$ corresponds to indexes of the smallest segment size within the range of segment sizes from Eq.~\ref{eq:DataSegment}. To classify incorrect centers, the normal vector of the tangent is found using a 90 degree rotation by
 \begin{equation}
 	\mathbf{a}\left(n\right) = \left[\begin{array}{cc}
 	0 & -1 \\
@@ -289,14 +289,14 @@ where an incorrect estimate is detected with the condition
 \begin{equation}\label{eq:IncorrectSideClassifier}
     \zeta(n,\kappa) < 0.
 \end{equation} 
-If no candidate circle center satisfies this condition at a particular point, then the IP and IA can not be estimated for that sample. These values must be interpolated at the completion of the estimation procedure. 
+If no candidate circle center satisfies this condition at a particular point, then the IP and IA cannot be estimated for that sample. These values must be interpolated at the completion of the estimation procedure. 
 
 \subsubsection{Incorrect Phase Change}
-The candidate circle fits are further constrained using prior information of the phase progression. From our fundamental definition of IP, the unwrapped phase is monotonically increasing in time except at $2\pi$ phase transitions. Under the assumption that the offset, $x_0(n)$, is varying on a much slower time-scale than the oscillatory component, $x(n)$, a phase increment threshold and a phase transition threshold can be derived given knowledge of the sampling rate and the maximum Fourier frequency of interest. To begin the derivation, an oversampling parameter is defined based on the Nyquist sampling theorem as
+The candidate circle fits are further constrained using prior information of the phase progression. From our fundamental definition of IP, the unwrapped phase is monotonically increasing in time except at $2\pi$ phase transitions. Under the assumption that the offset, $x_0(n)$, is varying on a much slower time-scale than the oscillatory component, $x(n)$, a phase increment threshold and a phase transition threshold can be derived given knowledge of the sampling rate and the maximum frequency of interest in the signal. To begin the derivation, an oversampling parameter is defined based on the Nyquist sampling theorem as
 \begin{equation}
 	\rho\triangleq\frac{F_s}{2f_{max}},
 \end{equation}
-where $\rho \in \mathbb{R} \ge 1$, $F_s$ is the sampling frequency and $f_{max}$ is the maximum Fourier frequency of interest in the signal. The maximum phase increment for consecutive samples is 
+where $\rho \in \mathbb{R} \ge 1$, $F_s$ is the sampling frequency, and $f_{max}$ is the maximum frequency of interest in the signal. The maximum phase increment for consecutive samples is 
 \begin{equation}
 	\beta = \frac{\pi}{\rho}.
 \end{equation}
@@ -311,26 +311,26 @@ Following this, a valid phase change over consecutive samples must satisfy
 \end{align}
 where $\kappa^*$ indexes the best parameter estimates according to the criteria described below in Section~\ref{sect:BestParameters}. 
 
-If the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1} and~\ref{eq:Prior1part2} are not satisfied for all candidates from the previous sample, $n-1$, than parameters corresponding to an earlier sample, $n-p$, where the conditions are satisfied is used. Following this, we need to re-evaluate the thresholds used in Eq.~\ref{eq:Prior1} and~\ref{eq:Prior1part2} to
+If the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1}, and~\ref{eq:Prior1part2} are not satisfied for all candidates from the previous sample, $n-1$, than parameters corresponding to an earlier sample, $n-p$, where the conditions are satisfied is used. Following this, we need to re-evaluate the thresholds used in Eq.~\ref{eq:Prior1} and~\ref{eq:Prior1part2} to
 \begin{align}
 	\beta_p &= \frac{p\pi}{\rho} \\
 	\alpha_p &=\beta_p-2\pi.
 \end{align}
-Note, in order for the threshold $\alpha_p$ to be useful, it must be negative. Therefore, there is a limit on the number of samples backward in time that can be used where
+Note that in order for the threshold $\alpha_p$ to be useful, it must be negative. Therefore, there is a limit on the size of $p$ where $\alpha_p$ is meaningful such that
 \begin{equation}
 	p < 2\rho.
 \end{equation}
 
-\subsubsection{Amplitude - Frequency Relationship}
+\subsubsection{Amplitude-Frequency Relationship}
 The condition described in this section is designed to limit erroneous fluctuations in the IA estimates. The Bedrosian theorem states that the frequency content of the IA component should be lower than the frequency content of the IP component. Therefore, parameters corresponding to candidate circle fits should satisfy
 \begin{equation}
 	\mathcal{F}\{\hat{r}\left(n,\kappa\right)\} < \frac{d\hat{\phi}\left(n,\kappa \right)}{dt}=\omega(n).
 \end{equation}
-In practice this condition can not be used to check the integrity of the estimated parameters, since the Fourier transform of the instantaneous amplitude can not be calculated as the parameters are updated. However, we can approximate this condition using
+In practice, this condition cannot be used to check the integrity of the estimated parameters since the Fourier transform of the instantaneous amplitude cannot be calculated as the parameters are updated. However, we can approximate this condition using
 \begin{equation}\label{eq:Prior2}
     \left| {\hat{r}\left(n,\kappa\right) - \hat{r}\left(n-p,\kappa^*\right)} \right| < \hat{\phi}\left(n,\kappa \right) - \hat{\phi}\left(n-p,\kappa^*\right).
 \end{equation}
-Since this condition is only loosely based on the Bedrosian theorem; it is used as guide and not a hard rule. If this condition is satisfied for any candidate circle fits then only those fits will be used. However, if the condition is not satisfied for any candidate circle fits then the condition is not used.
+Since this condition is only loosely based on the Bedrosian theorem, it is used as guide and not a hard rule. If this condition is satisfied for any candidate circle fits then only those fits will be used. However, if the condition is not satisfied for any candidate circle fits then the condition is not used.
 
 \subsection{Selecting Best Parameters}\label{sect:BestParameters}
 To select the best segment size, we exploit the fact that in the noise-free case the CPT should preserve the relative distance and angle in the phase-plane between consecutive data points of the original signal in the mapped signal. In other words, the mapping can be considered a translation of the origin (to the offset $\mathbf{p}_{x_0}\left(n\right)$), maintaining the local structure of the data. The preservation of the data structure is measured using the distance mismatch (DM) between samples in $\mathbf{p}_y(n)$ and $\mathbf{p}_x(n,\kappa)$. 
@@ -344,17 +344,17 @@ where $n-m$ is the sample at the edge of the arc used to fit the candidate circl
 \begin{equation}\label{eq:relative_distance_mismatch}
     d\left( {n,\kappa} \right) = \|\mathbf{v}_2\left( n \right)-\mathbf{v}_1\left( n,\kappa \right)\|_2.
 \end{equation}
-If the mapping is a translation of the origin, preserving the original data structure, then the Euclidean distance between $\mathbf{v}_1$ and $\mathbf{v}_2$ will be zero. Therefore, the index for the best candidate circle fit is
+If the mapping is a translation of the origin that preserves the original data structure, then the Euclidean distance between $\mathbf{v}_1$ and $\mathbf{v}_2$ will be zero. Therefore, the index for the best candidate circle fit is
 \begin{equation}\label{Kappa_star}
 \kappa^* = \arg \mathop{\min} \limits_\kappa d\left( n,\kappa \right).
 \end{equation}
 
-By calculating the DM using points at the edge of the segment, the effect of noise is reduced. In addition, by using the point at the edge of the segment, the maximum arc size is controlled. If the arc length is too large for nonstationary signals then the trajectory of $\mathbf{p}_y(n)$ will not be an arc of a circle, therefore, the mapping will not be a translation of the origin. If the circle parameters at the trailing end of the segment do not satisfy the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1} and~\ref{eq:Prior1part2}, then $\mathbf{p}_x(n-m,\kappa^*)$ is not defined. In this case the next sample in the arc must be used ($n-m+1$) to find $\mathbf{v}_1(n,\kappa)$. If the conditions are not satisfied for the sample $n-m+1$, then $n-m+2$ is used and so on. If no samples in the arc satisfy the conditions then an alternative cost function is used. 
+By calculating the DM using points at the edge of the segment, the effect of noise is reduced. In addition, by using the point at the edge of the segment, the maximum arc size is controlled. If the arc length is too large for nonstationary signals then the trajectory of $\mathbf{p}_y(n)$ will not be an arc of a circle so the mapping will not be a translation of the origin. If the circle parameters at the trailing end of the segment do not satisfy the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1}, and~\ref{eq:Prior1part2} then $\mathbf{p}_x(n-m,\kappa^*)$ is not defined. In this case, the next sample in the arc must be used ($n-m+1$) to find $\mathbf{v}_1(n,\kappa)$. If the conditions are not satisfied for the sample $n-m+1$, then $n-m+2$ is used and so on. If no samples in the arc satisfy the conditions then an alternative cost function is used. 
 
-The alternative cost function by selects a candidate arc that satisfies Eqs.~\ref{eq:IncorrectSideClassifier} and \ref{eq:Prior1} and minimizes the cost function
+The alternative cost function selects a candidate arc that satisfies Eqs.~\ref{eq:IncorrectSideClassifier} and \ref{eq:Prior1} and minimizes
 \begin{align}\label{BestCircFit2Reinitialize}
 e\left( {n,\kappa} \right) &=  \\ \nonumber
- &\left\langle \left( y(q) - x_0\left( n,\kappa \right) \right)^2 + \left( \mathcal{H}y(q) - \mathcal{H}x_0\left( n,\kappa \right) \right)^2 - r\left( n,\kappa \right)^2 \right\rangle_q
+ &\left\langle \left( y(q) - x_0\left( n,\kappa \right) \right)^2 + \left( \mathcal{H}y(q) - \mathcal{H}x_0\left( n,\kappa \right) \right)^2 - r\left( n,\kappa \right)^2 \right\rangle_q,
 \end{align}
 where $\langle\rangle_q$ denotes the mean over the segment of the data used to fit the circle. The index for the best candidate circle fit is
 \begin{equation}\label{ReinitBestIndex}
