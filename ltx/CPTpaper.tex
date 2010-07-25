@@ -190,27 +190,28 @@ The CPT requires the signal to satisfy three conditions in addition to the condi
 Under our standing assumptions, the signal in the phase-plane can be modeled as
 \begin{align}\label{eq:SignalModel}
 y\left( t \right) &= x\left( t \right) + \varepsilon \left( t \right) \\
-\mathcal{H}y\left( t \right) &= \mathcal{H}(y\left( t \right) + \varepsilon \left( t \right)),
+\mathcal{H}y\left( t \right) &= \mathcal{H}(x\left( t \right) + \varepsilon \left( t \right)),
 \end{align}
 where $x(t) \in \mathbb{R}$ is an oscillatory component and $\varepsilon(t) \sim \mathcal{N}(0,\sigma^2)$ represents process or measurement noise. The oscillatory component, $x(t)$, can be thought of as being analogous to the first IMF of the HHT and can be parameterized by IA and IP as
 \begin{equation}\label{eq:InstAmplitudeAndPhase}
     x\left( t \right) = r\left( t \right)\cos \left( {\phi \left( t \right)} \right) + x_0(t),
 \end{equation}
-In the noise-free case, the IA is
+where $r(t)$ denotes the IA, $\phi(t)$ denotes the IP and $x_0(t)$ denotes an offset that will be modeled as the circle center. Note, the offset is assumed to be varying on a slow time-scale such that is can be filtered out in a pre-processing step, thus can be ignored. In the noise-free case, the IA is
 \begin{equation}\label{eq:IADef}
-    r\left( t \right) = \left( \left( y\left( t \right) - x_0\left( t \right) \right)^2 + \left( \mathcal{H}\left( y\left( t \right) - x_0\left( t \right) \right) \right)^2\right)^{1/2},
+    r\left( t \right) = \left( x(t)^2 + \mathcal{H}x(t)^2\right)^{1/2}.
 \end{equation}
+For a smooth continuous oscillatory signal, the IA will satisfy
 \begin{equation}\label{eq:IAlimitingCase}
 \mathop {\lim }\limits_{\tau  \to 0} \left( r\left( t \right) - r\left( t + \tau \right) \right) = 0,
 \end{equation}
-where $\left(x_0(t), \mathcal{H}x_0(t)\right)$ is the center of a circle followed by the (local) trajectory of $\left(x(t), \mathcal{H}x(t)\right)$. Naturally, it follows that for a small finite time interval, $\Delta t$, we have
+Naturally, it follows that for a small finite time interval, $\Delta t$, we have
 \begin{equation}\label{eq:IA_small_time_interval}
     r(t)-r(t-\Delta t) < \eta
 \end{equation}
-where $\eta \in \mathbb{R}$ is a small constant. Equations~\ref{eq:IADef}, \ref{eq:IAlimitingCase}, and \ref{eq:IA_small_time_interval} simply state that given a sufficiently small segment of data the local oscillatory component of $y(t)$ can be approximated by an arc of a circle in the phase-plane or, equivalently, a sinusoid in the time domain. In the noise-free case, the IP of $x(t)$ is
+where $\eta \in \mathbb{R}$ is a small constant. Equations~\ref{eq:IADef}, \ref{eq:IAlimitingCase}, and \ref{eq:IA_small_time_interval} simply state that given a sufficiently small segment of data the local oscillatory component $x(t)$ can be approximated by an arc of a circle in the phase-plane or, equivalently, a sinusoid in the time domain. In the noise-free case, the IP of $x(t)$ is
 \begin{equation}\label{IPdef}
-    \phi \left( t \right) = \arctan \left( \frac{\mathcal{H}\left( y\left( t \right) - x_0\left( t \right) \right)}
-    {y\left( t \right) - x_0\left( t \right)} \right).
+    \phi \left( t \right) = \arctan \left( \frac{\mathcal{H}x\left( t \right)}
+    {x\left( t \right)} \right).
 \end{equation}
 
 % this bit is commented out because we are not comparing the CPT to the DQ method
@@ -262,7 +263,7 @@ By estimating a circle that best fits the data segment in a least squares sense,
 \subsection{Detecting Invalid Parameters}\label{sect:DetectingInvalidParameters}
 To accurately approximate the the phase-plane trajectory of a nonstationary signal by an arc of a circle, it is desirable to use small segments of data. However, when using fewer points and smaller arc lengths, noise has a larger effect on the result. Therefore, a series of checks is used to prevent errors. 
 \subsubsection{Incorrect Circle Center Identification}
-Any bounded oscillatory signal will have a closed trajectory in the phase-plane. Therefore, the fitted circle centers (signal offsets) should be confined to one side of the arc. However, errors can occur when fitting circles to noisy data with small arc lengths. A check to prevent circle centers being mapped to the incorrect side is to use the local tangent of the signal as a separating hyper-plane. If candidate circle centers are on the incorrect side of the tangent, they are rejected. The signal in the phase-plane in vector form is described as
+Any bounded oscillatory signal will have a closed trajectory in the phase-plane. Therefore, the fitted circle centers (signal offsets) should be confined to one side of the arc. However, errors can occur when fitting circles to noisy data with small arc lengths, where noise may make a concave arc appear to be convex (or vice-versa), resulting in the circle center being mapped to the incorrect side of the arc. A check to prevent circle centers being mapped to the incorrect side is to use the local tangent of the signal as a separating line. If candidate circle centers are on the incorrect side of the tangent, they are rejected. The signal in the phase-plane in vector form is described as
 \begin{equation}
 	\mathbf{p}_y(n) = \left[y\left(n\right),\mathcal{H}y\left(n\right)\right]^{\top}.
 \end{equation}
@@ -276,14 +277,14 @@ where $m_{min}$ corresponds to indexes of the smallest segment size within the r
 	0 & -1 \\
 	1 & 0\end{array}\right]\mathbf{z}(n).
 \end{equation}
-The estimated oscillatory, $\hat{x}(n,\kappa)$, and offset, $\hat{x}_0(n,\kappa)$, components of the signal can be written in vector form as
+The estimated oscillatory component, $\hat{x}(n,\kappa)$, and the associated circle center (or offset), $\hat{x}_0(n,\kappa)$, can be written in vector form as
 \begin{align}
 	\mathbf{p}_x(n,\kappa) &= \left[\hat{x}\left(n,\kappa\right),\mathcal{H}\hat{x}\left(n,\kappa\right)\right]^{\top} \\ 
 	\mathbf{p}_{x_0}\left(n,\kappa\right) &= \left[\hat{x}_0\left(n,\kappa\right), \mathcal{H}\hat{x}_0\left(n,\kappa\right)\right]^{\top}, 
 \end{align}
 where $\kappa$ indexes the candidates with varying arc lengths. Invalid candidate circle centers are detected using 
 \begin{equation}
-    \zeta(n,\kappa) = \mathbf{a}\left( n\right)^{\top}\left( \mathbf{p}_{x_0}\left( n,\kappa \right) - \left(\mathbf{p}_x\left( n,\kappa \right) + \mathbf{p}_{x_0}\left( n,\kappa \right)\right) \right),
+    \zeta(n,\kappa) = \mathbf{a}\left( n\right)^{\top}\left( \mathbf{p}_{x_0}\left( n,\kappa \right) - \mathbf{p}_x\left( n,\kappa \right) \right),
 \end{equation}
 where an incorrect estimate is detected with the condition
 \begin{equation}\label{eq:IncorrectSideClassifier}
