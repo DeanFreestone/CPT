@@ -1,7 +1,6 @@
 % journal,10pt,draftclsnofoot,onecolumn
 \documentclass[journal,11pt,a4paper,onecolumn,draftcls]{IEEEtran}
 % \documentclass[a4paper]{IEEEtran}
-% \documentclass[reqno,a4paper,onecolumn,draftcls]{article}
 \usepackage{graphicx, algorithm, algorithmicx, algpseudocode}
 \usepackage{color}                    % For creating coloured text and background
 \usepackage{amsmath,amssymb,amsfonts,epsfig} % Typical maths resource packages
@@ -189,12 +188,13 @@ With sufficient sampling and signal-to-noise ratio, the instantaneous properties
 The CPT requires the signal to satisfy three conditions in addition to the condition stated by the Bedrosian theorem (Eqs.~\ref{eq:BedrosianCondition}). The signal must be 1) smooth and continuous, 2) oscillatory, and 3) mono-component. The third condition allows for physical interpretation of the CPT. A common way to define a signal as being mono-component is to use a particular basis and time scale as a reference~\cite{Boashash1992,Cohen1995}. This definition is not appropriate here, since we are dealing with instantaneous quantities, where time scales are continuously changing and the basis is arbitrary. Therefore, we define a signal as being mono-component if it can be sufficiently described by a scalar quantity when it is sampled from a vector field. For example, when considering sea level measurement, the signal is mono-component if the surface of the sea beneath the measurement sensor is uniform in height (or can be approximated by an average). This condition does not restrict the generator of a signal to a single source. Sea level will be affected by waves from all directions but, if the measurement is descriptive of the process at a single point in space, we can consider it mono-component. Together, the conditions ensure the signal has an oscillatory component that has a phase that is monotonically increasing in time (except at $2\pi$ transitions) and a trajectory in the phase-plane that encloses the origin. 
 
 Under our standing assumptions, the signal in the phase-plane can be modeled as
-\begin{equation}\label{eq:SignalModel}
-y\left( t \right) = x\left( t \right) + x_0\left( t \right) + \varepsilon \left( t \right),
-\end{equation}
-where $x(t),x_0(t) \in \mathbb{R}$ are the oscillatory and offset components, respectively, and $\varepsilon(t) \sim \mathcal{N}(0,\sigma^2)$ represents process or measurement noise. The oscillatory component, $x(t)$, can be thought of as being analogous to the first IMF of the HHT and can be parameterized by IA and IP as
+\begin{align}\label{eq:SignalModel}
+y\left( t \right) &= x\left( t \right) + \varepsilon \left( t \right) \\
+\mathcal{H}y\left( t \right) &= \mathcal{H}(y\left( t \right) + \varepsilon \left( t \right)),
+\end{align}
+where $x(t) \in \mathbb{R}$ is an oscillatory component and $\varepsilon(t) \sim \mathcal{N}(0,\sigma^2)$ represents process or measurement noise. The oscillatory component, $x(t)$, can be thought of as being analogous to the first IMF of the HHT and can be parameterized by IA and IP as
 \begin{equation}\label{eq:InstAmplitudeAndPhase}
-    x\left( t \right) = r\left( t \right)\cos \left( {\phi \left( t \right)} \right).
+    x\left( t \right) = r\left( t \right)\cos \left( {\phi \left( t \right)} \right) + x_0(t),
 \end{equation}
 In the noise-free case, the IA is
 \begin{equation}\label{eq:IADef}
@@ -289,32 +289,39 @@ where an incorrect estimate is detected with the condition
 \begin{equation}\label{eq:IncorrectSideClassifier}
     \zeta(n,\kappa) < 0.
 \end{equation} 
-If no candidate circle center satisfies this condition at a particular point, then the IP and IA cannot be estimated for that sample. These values must be interpolated at the completion of the estimation procedure. 
+If no candidate circle center satisfies this condition at a particular point, then the IP and IA cannot be estimated for that sample using this method. These values must be interpolated at the completion of the estimation procedure. 
 
 \subsubsection{Incorrect Phase Change}
 The candidate circle fits are further constrained using prior information of the phase progression. From our fundamental definition of IP, the unwrapped phase is monotonically increasing in time except at $2\pi$ phase transitions. Under the assumption that the offset, $x_0(n)$, is varying on a much slower time-scale than the oscillatory component, $x(n)$, a phase increment threshold and a phase transition threshold can be derived given knowledge of the sampling rate and the maximum frequency of interest in the signal. To begin the derivation, an oversampling parameter is defined based on the Nyquist sampling theorem as
 \begin{equation}
 	\rho\triangleq\frac{F_s}{2f_{max}},
 \end{equation}
-where $\rho \in \mathbb{R} \ge 1$, $F_s$ is the sampling frequency, and $f_{max}$ is the maximum frequency of interest in the signal. The maximum phase increment for consecutive samples is 
+where $\rho \in \mathbb{R} \ge 1$, $F_s$ is the sampling frequency, and $f_{max}$ is the maximum frequency of interest in the signal. Under the assumption that the IP estimate at sample $n$ is accurate, the phase estimate at sample $n+1$ should satisfy
 \begin{equation}
-	\beta = \frac{\pi}{\rho}.
+	0 < \hat\phi(n+1,\kappa)-\hat\phi(n,\kappa^*) < \beta
 \end{equation}
+where 
+\begin{equation}
+	\beta = \frac{\pi}{\rho}
+\end{equation}
+and $\kappa^*$ indexes the best parameter estimates according to the criteria described below in Section~\ref{sect:BestParameters}. Now consider the next IP estimate at the sample $n+2$. The error in the previous estimate is bounded by $\beta$, so the error in the next estimate must satisfy
+\begin{equation}\label{eq:Prior1}
+	0 < \hat\phi(n+2,\kappa)-\hat\phi(n+1,\kappa^*) < 2\beta
+\end{equation} 
+
 At a $2\pi$ phase transition, the maximum phase decrement in radians is
 \begin{equation}
-	\alpha=\beta-2\pi.
+	\alpha=2\beta-2\pi.
 \end{equation}
-Following this, a valid phase change over consecutive samples must satisfy
-\begin{align}\label{eq:Prior1}
-0 &< \hat{\phi} \left( n,\kappa \right) - \hat{\phi} \left( n-1,\kappa^* \right) \le \beta \\
-\alpha &\ge \hat{\phi} \left( n,\kappa \right) - \hat{\phi} \left( n-1,\kappa^* \right), \label{eq:Prior1part2}
-\end{align}
-where $\kappa^*$ indexes the best parameter estimates according to the criteria described below in Section~\ref{sect:BestParameters}. 
+Following this, the phase evolution should also satisfy
+\begin{equation}\label{eq:Prior2}
+\alpha \ge \hat{\phi} \left( n,\kappa \right) - \hat{\phi} \left( n-1,\kappa^* \right). 
+\end{equation}
 
-If the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1}, and~\ref{eq:Prior1part2} are not satisfied for all candidates from the previous sample, $n-1$, than parameters corresponding to an earlier sample, $n-p$, where the conditions are satisfied is used. Following this, we need to re-evaluate the thresholds used in Eq.~\ref{eq:Prior1} and~\ref{eq:Prior1part2} to
+If the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1}, and~\ref{eq:Prior2} are not satisfied for all candidates from the previous sample, $n-1$, than parameters corresponding to an earlier sample, $n-p$, where the conditions are satisfied is used. Following this, we need to re-evaluate the thresholds used in Eq.~\ref{eq:Prior1} and~\ref{eq:Prior2} to
 \begin{align}
 	\beta_p &= \frac{p\pi}{\rho} \\
-	\alpha_p &=\beta_p-2\pi.
+	\alpha_p &=2\beta_p-2\pi.
 \end{align}
 Note that in order for the threshold $\alpha_p$ to be useful, it must be negative. Therefore, there is a limit on the size of $p$ where $\alpha_p$ is meaningful such that
 \begin{equation}
@@ -327,7 +334,7 @@ The condition described in this section is designed to limit erroneous fluctuati
 	\mathcal{F}\{\hat{r}\left(n,\kappa\right)\} < \frac{d\hat{\phi}\left(n,\kappa \right)}{dt}=\omega(n).
 \end{equation}
 In practice, this condition cannot be used to check the integrity of the estimated parameters since the Fourier transform of the instantaneous amplitude cannot be calculated as the parameters are updated. However, we can approximate this condition using
-\begin{equation}\label{eq:Prior2}
+\begin{equation}\label{eq:Prior3}
     \left| {\hat{r}\left(n,\kappa\right) - \hat{r}\left(n-p,\kappa^*\right)} \right| < \hat{\phi}\left(n,\kappa \right) - \hat{\phi}\left(n-p,\kappa^*\right).
 \end{equation}
 Since this condition is only loosely based on the Bedrosian theorem, it is used as guide and not a hard rule. If this condition is satisfied for any candidate circle fits then only those fits will be used. However, if the condition is not satisfied for any candidate circle fits then the condition is not used.
@@ -349,9 +356,9 @@ If the mapping is a translation of the origin that preserves the original data s
 \kappa^* = \arg \mathop{\min} \limits_\kappa d\left( n,\kappa \right).
 \end{equation}
 
-By calculating the DM using points at the edge of the segment, the effect of noise is reduced. In addition, by using the point at the edge of the segment, the maximum arc size is controlled. If the arc length is too large for nonstationary signals then the trajectory of $\mathbf{p}_y(n)$ will not be an arc of a circle so the mapping will not be a translation of the origin. If the circle parameters at the trailing end of the segment do not satisfy the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1}, and~\ref{eq:Prior1part2} then $\mathbf{p}_x(n-m,\kappa^*)$ is not defined. In this case, the next sample in the arc must be used ($n-m+1$) to find $\mathbf{v}_1(n,\kappa)$. If the conditions are not satisfied for the sample $n-m+1$, then $n-m+2$ is used and so on. If no samples in the arc satisfy the conditions then an alternative cost function is used. 
+By calculating the DM using points at the edge of the segment, the effect of noise is reduced. In addition, by using the point at the edge of the segment, the maximum arc size is controlled. If the arc length is too large for nonstationary signals then the trajectory of $\mathbf{p}_y(n)$ will not be an arc of a circle so the mapping will not be a translation of the origin. If the circle parameters at the trailing end of the segment do not satisfy the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1}, and~\ref{eq:Prior2} then $\mathbf{p}_x(n-m,\kappa^*)$ is not defined. In this case, the next sample in the arc must be used ($n-m+1$) to find $\mathbf{v}_1(n,\kappa)$. If the conditions are not satisfied for the sample $n-m+1$, then $n-m+2$ is used and so on. If no samples in the arc satisfy the conditions then an alternative cost function is used. 
 
-The alternative cost function selects a candidate arc that satisfies Eqs.~\ref{eq:IncorrectSideClassifier} and \ref{eq:Prior1} and minimizes
+The alternative cost function selects a candidate arc that satisfies Eqs.~\ref{eq:IncorrectSideClassifier}, \ref{eq:Prior1}, and~\ref{eq:Prior2} and minimizes
 \begin{align}\label{BestCircFit2Reinitialize}
 e\left( {n,\kappa} \right) &=  \\ \nonumber
  &\left\langle \left( y(q) - x_0\left( n,\kappa \right) \right)^2 + \left( \mathcal{H}y(q) - \mathcal{H}x_0\left( n,\kappa \right) \right)^2 - r\left( n,\kappa \right)^2 \right\rangle_q,
@@ -360,15 +367,15 @@ where $\langle\rangle_q$ denotes the mean over the segment of the data used to f
 \begin{equation}\label{ReinitBestIndex}
 \kappa^ * = \arg \mathop {\min }\limits_\kappa e\left( {n,\kappa} \right).
 \end{equation}
-This alternative cost function finds the best circle by minimizing the geometric distance between the signal and fitted points. For small arc lengths, this cost function is not as restrictive as Eq.~\ref{eq:relative_distance_mismatch} so the parameter estimates are not as reliable. Therefore, once re-initialized, the DM is used to specify the candidate circle. %\dean{For discussion:Other criteria for finding circle parameters are sure to exist and this is a topic for further research.}
+This alternative cost function finds the best circle by minimizing the distance between the signal and fitted points. For small arc lengths, this cost function is not as restrictive as Eq.~\ref{eq:relative_distance_mismatch} so the parameter estimates are not as reliable. Therefore, once re-initialized, the DM is used to specify the candidate circle. %\dean{For discussion:Other criteria for finding circle parameters are sure to exist and this is a topic for further research.}
 
-Parameters corresponding to samples where no candidate circle fit satisfied the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1} and~\ref{eq:Prior1part2} are interpolated after the time series has be processed. Since the unwrapped phase is monotonically increasing, we can use a linear interpolation to find missing values. Interpolating the missing IA estimates is a little more challenging, since it is not monotonic. However, the IA is fluctuating on a slower time scale than the IP so it can be interpolated using a shape preserving cubic spline. Alternatively, given an accurate IP estimate, we can find an empirical estimate of the IA. This is explained in Section~\ref{sect:CPTEMDSection}. 
+Parameters corresponding to samples where no candidate circle fit satisfied the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1}, and~\ref{eq:Prior2} are interpolated after the time series has been processed. Since the unwrapped phase is monotonically increasing, we can use a linear interpolation to find missing values. Interpolating the missing IA estimates is a little more challenging, since it is not monotonic. However, the IA is fluctuating on a slower time scale than the IP so it can be interpolated using a shape preserving cubic spline. Alternatively, given an accurate IP estimate, we can find an empirical estimate of the IA. This is explained in Section~\ref{sect:CPTEMDSection}. 
 
-The CPT algorithm has two free parameters specifying the minimum, $m_{min}$, and maximum, $m_{max}$, number of points used to find candidate circle fits. The minimum segment size should be set according to the sampling rate (where higher sampling requires a larger $m_{min}$), the frequency content of the signal (higher frequencies requires a smaller $m_{min}$), and the level of noise (more noise requires a larger $m_{min}$). Importantly, $m_{min}$ also specifies the points used to estimate the tangent vector, therefore a larger $m_{min}$ is required to find an appropriate circle fit and the ensure the approximated tangent is in the direction of the true tangent in the presence of noise. This point is further elaborated in Section~\ref{sect:NoisySignalsSection}. 
+The CPT algorithm has two free parameters specifying the minimum, $m_{min}$, and maximum, $m_{max}$, number of points used to find candidate circle fits. The minimum segment size should be set according to the sampling rate (where a higher sampling rate requires a larger $m_{min}$), the frequency content of the signal (higher frequencies requires a smaller $m_{min}$), and the level of noise (more noise requires a larger $m_{min}$). Importantly, $m_{min}$ also specifies the points used to estimate the tangent vector, so a larger $m_{min}$ is required to find an appropriate circle fit and the ensure the approximated tangent is in the direction of the true tangent in the presence of noise. This point is further elaborated in Section~\ref{sect:NoisySignalsSection}. 
 
-As a general rule $m_{min}$ should be set to less than half the number of samples in the period of $f_{max}$. For noisy signals $m_{min}$ should be set closer to half the number of samples in the period of $f_{max}$. This provides the optimal number of points for estimating the tangent vector. For low noise signals, $m_{min}$ should be decreased so that modulations and nonstationarities can be modeled more accurately. 
+As a general rule, $m_{min}$ should be set to less than half the number of samples in the period of $f_{max}$. For noisy signals, $m_{min}$ should be set closer to half the number of samples in the period of $f_{max}$. This provides the optimal number of points for estimating the tangent vector. For low noise signals, $m_{min}$ should be decreased so that modulations and nonstationarities can be modeled more accurately. 
 
-As mentioned above, a property of the DM is that it prevents over fitting. For nonstationary signals, if the candidate segment sizes used to fit the circles are too large the mapping is no longer a simple translation of the origin and candidates with smaller arc lengths will be selected. Therefore, the CPT is not sensitive to the choice of $m_{max}$, and it should be limited by computation complexity.
+As mentioned above, a property of the DM is that it prevents over-fitting. For nonstationary signals, if the candidate segment sizes used to fit the circles are too large the mapping is no longer a simple translation of the origin and candidates with smaller arc lengths will be selected. Therefore, $m_{max}$ is limited by computation demands.
 
 \begin{algorithm}
 \caption{The Circular Phase Transform}\label{CPTAlgorithm}
@@ -423,61 +430,61 @@ The results in Fig.~\ref{RMSEComparison} shows that with no noise (SNR = $\inf$)
 
 Focusing on the results from the CPT for the first time group, the variance of the IP estimate begins to increase at a SNR of approximately $14$~dB. These errors occur because the minimum arc length is too short given the noise level. When the minimum arc length is too short, the principal axis of the segment is in the direction of the additive noise rather than following the trajectory of the signal. This can be overcome by using a larger arc length and estimating the tangent vector using more samples. However, increasing the minimum segment size would impact negatively on the higher frequency part of the chirp. For the second time group, as noise is increased, errors increase in a systematic way with an approximate inverse linear relationship to the SNR. For this group, the minimum segment size is sufficient to estimate a satisfactory tangent. Errors in the third group, starting from approximate $7$~dB, are because the SNR is too high for the algorithm to work, regardless of the segment size. Together, these results demonstrate that for relatively simple signals the CPT can estimate IP in the presence of mild disturbances. \todo{DG: we need to consider increasing this discussion of the figure.}
 
-\section{The CPT for Empirical Mode Decomposition}\label{sect:CPTEMDSection}
-For low noise signals, the CPT can be used as an alternative to the sifting process of the HHT to create an empirical mode decomposition (EMD). The CPT EMD models the signal as
-\begin{eqnarray}
-    y(n) &=& x_{0,K}(n) + \sum_{k=1}^{K}x_k(n) + \varepsilon(n) \\
-    x_k\left(n\right) &=& r_k\left(n\right)cos\left(\phi_k\left(n\right)\right),
-\end{eqnarray}
-where the subscript $k$ indexes the $K$ intrinsic mode functions (IMFs), $x_k(n)$, of the EMD. The IP, $\phi_k(n)$, for each IMF is estimated using the CPT. The IMFs are ordered such that the highest frequency component corresponds to $k=1$. For the first IMF $x_1(n)$, we can consider $x_{0,1}(n)$ as a modulation term. If $x_{0,1}(n)$ also has modulations then it can be decomposed into an oscillatory term $x_2(n)$ and an offset (another modulating term) $x_{0,2}(n)$. The process can be repeated until all $K$ oscillatory modes are extracted from $y(n)$, leaving the final offset term $x_{0,K}(n)$.
-As we have demonstrated, the IP can be estimated using the CPT without the requirement of sifting. However, for complicated signals, the estimates of IA and offset are not accurate enough to be used in the decomposition. Therefore, an empirical method is used for approximating the IA, $r_k(n)$, and offset, $x_{0,k}(n)$ to perform the CPT EMD. The empirical method used for estimating the IA in the CPT EMD is similar to the method used in the normalized Hilbert transform for separating the IA from the IP components~\cite{Huang2005}. The empirical offset, $x_{0,k}(n)$ is approximated by
-\begin{equation}
-    x_{0,k}(n) = \frac{s_{max,k}(n) + s_{min,k}(n)}{2},
-\end{equation}
-where $s_{max,k}(n)$ is a cubic spline interpolation through points from $y(n)$ (if $k=1$) or $x_{0,k}$ (if $k>1$) corresponding to maxima of $cos(\phi_k(t))$ and $s_{min,k}(n)$ is another cubic spline interpolation through points from $y(n)$ (if $k=1$) or $x_{0,k}$ (if $k>1$) corresponding to minima of $cos(\phi_k(t))$. After finding the empirical offset, the empirical IA can be approximated by 
-\begin{equation}
-    r_1(n) = s_{ext,k}(n)
-\end{equation}
-where $s_{ext,k}(n)$ is a cubic spline interpolation through the maxima of
-\begin{equation}
-    g_k(n) = \left\{ \begin{array}{*{20}{c}}
-    {|y(n) - x_{0,k}(n)|} & {k=1} \\
-    {|x_{0,k-1}(n) - x_{0,k}(n)|} & {k>1}. \\
-    \end{array} \right.
-\end{equation}
-The process can then be repeated by computing the CPT on $x_{0,1}(n)$ to find $\phi_2(n)$. Then $\phi_2(n)$ can be used to  find $x_{0,2}(n)$ and $r_2(n)$ can be found using $x_{0,1}(n)$ and $x_{0,2}(n)$. For a full decomposition, this procedure should be repeated until $x_{0,k}(n)$ is monotonic. The steps of the CPT EMD algorithm are presented in Algorithm~\ref{CPTEMDAlgorithm} and a graphical explanation can be seen in Fig.~\ref{CPT_EMD}.
-
-Note that the IA and offset approximations are made using only the IP estimate. The IP can be estimated more accurately than the IA and offset from data, since we know the unwrapped IP is a monotonic function of time.
-
-The minimum segment size to perform the CPT should be set the same way as described earlier, such that the tangent vector is in the direction of the signal's trajectory in the phase-plane. However, the maximum number of samples should be made sufficiently large such the lower frequency components can be accurately modelled. This does not mean that there should be a dramatic increase in $Q_{max}$, as the lower frequency components become more regular and less noisy, therefore can be modeled by relatively smaller arc lengths.
-
-An advantage of the CPT EMD over the HHT is that the IA structure is maintained and the IP estimate is not subject to the nonlocal effects of the interpolation in the sifting process. In addition, as demonstrated in Section~\ref{sect:NoisySignalsSection} the CPT can estimate the IP in the presence of mild disturbances thereby alleviating problems from intra-mode mixing. By combining techniques from the HHT and normalized Hilbert transform, an improved and more meaningful EMD is achieved. This demonstrates the advantage of the CPT EMD method. %An examples of using the CPT with an EEG signal is presented in section~\ref{EEGExampleSection}.
-
-\begin{figure}
-\centering
-\includegraphics[scale=0.42]{./Figures/CPT_EMD_demo.eps}
-\caption[CPT_EMD]{Illustration of the CPT EMD method. The same signal $y(n)$ is used here as was used in Fig.~\ref{fig:HHTDemo}. \textbf{A.} The test signal (blue) with the interpolated maxima and minima lines (green and cyan respectively) and points corresponding the extrema of $cos\left(\phi_1(n)\right)$. \textbf{B.} The absolute value of the test signal demodulated by the empirical offset $x_{0,1}(n)$ (blue), the empirical IA estimate $r_{1}(n)$ (green), and the samples corresponding to extrema of $cos\left(\phi_1\left(n\right)\right)$ (red). \textbf{C.} The first IMF of the CPT EMD decomposition $\tilde{r}_1(n)cos\left(\phi_1\left(n\right)\right)$. Note the empirical offset goes through the points of inflection at $1.25 s$ and $1.75s$, where these points were missed on the first iteration of the sifting process. When comparing the IMF in C. to Fig.~\ref{fig:HHTDemo} D. we can see CPT EMD is superior in preserving the structure of the IA estimate for the decomposition.}
-\label{CPT_EMD}
-\end{figure}
-
-\begin{algorithm}
-\caption{The CPT for EMD}\label{CPTEMDAlgorithm}
-\begin{algorithmic}[1]
-\State $k=1$
-\State use CPT from Algorithm~\ref{CPTAlgorithm} to estimate $\phi_k(n)$ from $y(n)$
-\State find local extrema of $cos\left(\phi_k(n)\right)$
-\State use extrema to form the splines $s_{min,k}(n)$ and $s_{max,k}(n)$
-\State calculate $x_{0,k}(n) = 0.5\left(s_{min,k}(n) + s_{max,k}(n)\right)$
-\State find local maxima of $h_k(n)$
-\State use maxima to form the spline $r_k(n) = s_{ext,k}(n)$
-\While { $x_{0,k}(n)$ is not monotonic }
-    \State $k=k+1$
-    \State perform CPT on $x_{0,k-1}(n)$ to estimate $\phi_{k}(n)$
-    \State repeats steps 3 to 7 to approximate parameters
-\EndWhile
-
-\end{algorithmic}
-\end{algorithm}
+% \section{The CPT for Empirical Mode Decomposition}\label{sect:CPTEMDSection}
+% For low noise signals, the CPT can be used as an alternative to the sifting process of the HHT to create an empirical mode decomposition (EMD). The CPT EMD models the signal as
+% \begin{eqnarray}
+%     y(n) &=& x_{0,K}(n) + \sum_{k=1}^{K}x_k(n) + \varepsilon(n) \\
+%     x_k\left(n\right) &=& r_k\left(n\right)cos\left(\phi_k\left(n\right)\right),
+% \end{eqnarray}
+% where the subscript $k$ indexes the $K$ intrinsic mode functions (IMFs), $x_k(n)$, of the EMD. The IP, $\phi_k(n)$, for each IMF is estimated using the CPT. The IMFs are ordered such that the highest frequency component corresponds to $k=1$. For the first IMF $x_1(n)$, we can consider $x_{0,1}(n)$ as a modulation term. If $x_{0,1}(n)$ also has modulations then it can be decomposed into an oscillatory term $x_2(n)$ and an offset (another modulating term) $x_{0,2}(n)$. The process can be repeated until all $K$ oscillatory modes are extracted from $y(n)$, leaving the final offset term $x_{0,K}(n)$.
+% As we have demonstrated, the IP can be estimated using the CPT without the requirement of sifting. However, for complicated signals, the estimates of IA and offset are not accurate enough to be used in the decomposition. Therefore, an empirical method is used for approximating the IA, $r_k(n)$, and offset, $x_{0,k}(n)$ to perform the CPT EMD. The empirical method used for estimating the IA in the CPT EMD is similar to the method used in the normalized Hilbert transform for separating the IA from the IP components~\cite{Huang2005}. The empirical offset, $x_{0,k}(n)$ is approximated by
+% \begin{equation}
+%     x_{0,k}(n) = \frac{s_{max,k}(n) + s_{min,k}(n)}{2},
+% \end{equation}
+% where $s_{max,k}(n)$ is a cubic spline interpolation through points from $y(n)$ (if $k=1$) or $x_{0,k}$ (if $k>1$) corresponding to maxima of $cos(\phi_k(t))$ and $s_{min,k}(n)$ is another cubic spline interpolation through points from $y(n)$ (if $k=1$) or $x_{0,k}$ (if $k>1$) corresponding to minima of $cos(\phi_k(t))$. After finding the empirical offset, the empirical IA can be approximated by 
+% \begin{equation}
+%     r_1(n) = s_{ext,k}(n)
+% \end{equation}
+% where $s_{ext,k}(n)$ is a cubic spline interpolation through the maxima of
+% \begin{equation}
+%     g_k(n) = \left\{ \begin{array}{*{20}{c}}
+%     {|y(n) - x_{0,k}(n)|} & {k=1} \\
+%     {|x_{0,k-1}(n) - x_{0,k}(n)|} & {k>1}. \\
+%     \end{array} \right.
+% \end{equation}
+% The process can then be repeated by computing the CPT on $x_{0,1}(n)$ to find $\phi_2(n)$. Then $\phi_2(n)$ can be used to  find $x_{0,2}(n)$ and $r_2(n)$ can be found using $x_{0,1}(n)$ and $x_{0,2}(n)$. For a full decomposition, this procedure should be repeated until $x_{0,k}(n)$ is monotonic. The steps of the CPT EMD algorithm are presented in Algorithm~\ref{CPTEMDAlgorithm} and a graphical explanation can be seen in Fig.~\ref{CPT_EMD}.
+% 
+% Note that the IA and offset approximations are made using only the IP estimate. The IP can be estimated more accurately than the IA and offset from data, since we know the unwrapped IP is a monotonic function of time.
+% 
+% The minimum segment size to perform the CPT should be set the same way as described earlier, such that the tangent vector is in the direction of the signal's trajectory in the phase-plane. However, the maximum number of samples should be made sufficiently large such the lower frequency components can be accurately modelled. This does not mean that there should be a dramatic increase in $Q_{max}$, as the lower frequency components become more regular and less noisy, therefore can be modeled by relatively smaller arc lengths.
+% 
+% An advantage of the CPT EMD over the HHT is that the IA structure is maintained and the IP estimate is not subject to the nonlocal effects of the interpolation in the sifting process. In addition, as demonstrated in Section~\ref{sect:NoisySignalsSection} the CPT can estimate the IP in the presence of mild disturbances thereby alleviating problems from intra-mode mixing. By combining techniques from the HHT and normalized Hilbert transform, an improved and more meaningful EMD is achieved. This demonstrates the advantage of the CPT EMD method. %An examples of using the CPT with an EEG signal is presented in section~\ref{EEGExampleSection}.
+% 
+% \begin{figure}
+% \centering
+% \includegraphics[scale=0.42]{./Figures/CPT_EMD_demo.eps}
+% \caption[CPT_EMD]{Illustration of the CPT EMD method. The same signal $y(n)$ is used here as was used in Fig.~\ref{fig:HHTDemo}. \textbf{A.} The test signal (blue) with the interpolated maxima and minima lines (green and cyan respectively) and points corresponding the extrema of $cos\left(\phi_1(n)\right)$. \textbf{B.} The absolute value of the test signal demodulated by the empirical offset $x_{0,1}(n)$ (blue), the empirical IA estimate $r_{1}(n)$ (green), and the samples corresponding to extrema of $cos\left(\phi_1\left(n\right)\right)$ (red). \textbf{C.} The first IMF of the CPT EMD decomposition $\tilde{r}_1(n)cos\left(\phi_1\left(n\right)\right)$. Note the empirical offset goes through the points of inflection at $1.25 s$ and $1.75s$, where these points were missed on the first iteration of the sifting process. When comparing the IMF in C. to Fig.~\ref{fig:HHTDemo} D. we can see CPT EMD is superior in preserving the structure of the IA estimate for the decomposition.}
+% \label{CPT_EMD}
+% \end{figure}
+% 
+% \begin{algorithm}
+% \caption{The CPT for EMD}\label{CPTEMDAlgorithm}
+% \begin{algorithmic}[1]
+% \State $k=1$
+% \State use CPT from Algorithm~\ref{CPTAlgorithm} to estimate $\phi_k(n)$ from $y(n)$
+% \State find local extrema of $cos\left(\phi_k(n)\right)$
+% \State use extrema to form the splines $s_{min,k}(n)$ and $s_{max,k}(n)$
+% \State calculate $x_{0,k}(n) = 0.5\left(s_{min,k}(n) + s_{max,k}(n)\right)$
+% \State find local maxima of $h_k(n)$
+% \State use maxima to form the spline $r_k(n) = s_{ext,k}(n)$
+% \While { $x_{0,k}(n)$ is not monotonic }
+%     \State $k=k+1$
+%     \State perform CPT on $x_{0,k-1}(n)$ to estimate $\phi_{k}(n)$
+%     \State repeats steps 3 to 7 to approximate parameters
+% \EndWhile
+% 
+% \end{algorithmic}
+% \end{algorithm}
 
 % \begin{figure*}
 % \centering
@@ -509,32 +516,32 @@ An advantage of the CPT EMD over the HHT is that the IA structure is maintained 
 % Cochlear implant speech processing is possible application of this technique. The current model from the leading manufacturer of cochlear implants, Cochlear Ltd., has 22 electrodes implanted in the inner ear. Each electrode is positioned in an area of the cochlea that is sensitive to a different frequency range. For practical reasons only one electrode pair can receive stimulation current at any one time. The choice of the electrode to stimulate is made using speech processing strategies based on Fourier analysis using a filter bank~\cite{Loizou1998}. The CPT EMD offers an alternative where the choice of electrode can be based on the IF estimate and the stimulus activation current based on the IA estimate. The CPT is appropriate for many other signals similar to speech that have periodic aspects with intrawave modulation, that are not well represented by a Fourier basis, and are nonstationary.
 
 
-\section{Phase Plane Cusps}\label{sect:PhasePlaneCuspsSection}
-Perhaps the most challenging aspect of estimating instantaneous properties of signals is dealing with points of inflection in the time series, or equivalently for the CPT, cusps in the phase-plane. The difficulty in dealing with cusps lies in whether to interpret them as full oscillations or phase distortions. To illustrate this point, we define three possible scenarios where cusps occur. The first scenario is due additive noise, the second is due to under sampling of the data, the third occurs when cusps are an intrinsic property of signals. The first scenario is a trivial case and cusps introduced by noise should not be be modeled as full oscillations. To deal with this scenario $Q_{min}$ must be sufficiently large to overcome the noise. Examples of how noise effects the performance of the CPT are shown in Section~\ref{sect:NoisySignalsSection}. In practice, the second case is difficult to distinguish from the third case. Nevertheless, appropriate sampling and filtering as a preprocessing step and choosing an appropriate $Q_{min}$ can alleviate problems in with this scenario. Establishing a consistent procedure for dealing with the third scenario is more challenging. To study this we shall show how a simple mixture of two sinusoids can have intrinsic phase-plane cusps. This example is used to show how the CPT can deal with this case and demonstrate how cusps can be modeled as an oscillation or be treated as a phase distortion. The test signal and its Hilbert transform are defined as
-\begin{equation}\label{SamplingSigDef}
-    y\left( t \right) = {a_1}\cos \left( {{\omega _1}t} \right) + {a_2}\cos \left( {{\omega _2}t} \right).
-\end{equation}   
-To study where cusps occur, we first examine loops in the phase-plane that do not enclose the origin. As the signal goes through such a loop, the Hilbert phase slows, stops, reverses, stops again, and then proceeds forward. For the test signal, the time interval where the phase is decreasing (reversing) can be solved analytically by finding the period between stationary points of the Hilbert phase. The stationary points can be found by solving for times where the derivative of the IP is zero. For the test signal, an analytic form of the Hilbert phase can be found. The derivative of the analytic Hilbert phase is 
-\begin{eqnarray}
-    \frac{d\phi_y(t)}{dt}&=&0.5(\omega_2 + \omega_1) + 0.5(\omega_2 - \omega_1)\frac{a_2^2-a_1^2}{A^2(t)} \\
-    A^2(t) &=& a_1^2 + a_2^2 + 2a_1^2a_2^2cos((\omega_2-\omega_1)t).
-\end{eqnarray}
-The derivative of the Hilbert phase is zero where
-\begin{equation}\label{StationaryPhaseTimes}
-    t=\frac{1}{\omega_2-\omega_1}\arccos\left(-\frac{a_1^2\omega_1 + a_2^2\omega_2}{(\omega_2 +
-    \omega_1)a_1^2a_2^2}\right)+\frac{1}{\omega_2-\omega_1}2\pi k,
-\end{equation}
-where $k=1,2,...$ and the phase reversal period is (see Appendix~\ref{ReversalPeriodDerivation} for derivation) 
-\begin{eqnarray}\label{PhaseReversalPeriod}
-    T=\frac{2}{\omega_2-\omega_1}\arccos\left(g\left(a_1,a_2,\omega_1,\omega_2\right)\right) \\ 
-g\left(a_1,a_2,\omega_1,\omega_2\right) = \frac{a_1^2\omega_1 + a_2^2\omega_2}{(\omega_2 +
-    \omega_1)a_1^2a_2^2}.
-\end{eqnarray}
-For this test signal the sampling rate, $F_s$, must satisfy
-\begin{equation}
-    F_s \ge \frac{2}{T}
-\end{equation}
-to guarantee no cusps will be present. If $g>1$, then it becomes a complex quantity and cusps will be present irrespective of the sampling frequency. These are intrinsic cusps of the signal. If $g=1$ the cusps will be pointed and the CPT will map them as full oscillations. Small errors will occur when the segment used to fit the circle overlaps the point of the cusp. These errors occur because the fitted circle center will be on the incorrect side of the arc at the cusp. These errors will be detected and corrected by the methods explained in Section~\ref{sect:ComputingCPTSection}. However, when $g \gg 1$ the cusps become rounded and the CPT no longer maps them as full oscillations. 
+% \section{Phase Plane Cusps}\label{sect:PhasePlaneCuspsSection}
+% Perhaps the most challenging aspect of estimating instantaneous properties of signals is dealing with points of inflection in the time series, or equivalently for the CPT, cusps in the phase-plane. The difficulty in dealing with cusps lies in whether to interpret them as full oscillations or phase distortions. To illustrate this point, we define three possible scenarios where cusps occur. The first scenario is due additive noise, the second is due to under sampling of the data, the third occurs when cusps are an intrinsic property of signals. The first scenario is a trivial case and cusps introduced by noise should not be be modeled as full oscillations. To deal with this scenario $Q_{min}$ must be sufficiently large to overcome the noise. Examples of how noise effects the performance of the CPT are shown in Section~\ref{sect:NoisySignalsSection}. In practice, the second case is difficult to distinguish from the third case. Nevertheless, appropriate sampling and filtering as a preprocessing step and choosing an appropriate $Q_{min}$ can alleviate problems in with this scenario. Establishing a consistent procedure for dealing with the third scenario is more challenging. To study this we shall show how a simple mixture of two sinusoids can have intrinsic phase-plane cusps. This example is used to show how the CPT can deal with this case and demonstrate how cusps can be modeled as an oscillation or be treated as a phase distortion. The test signal and its Hilbert transform are defined as
+% \begin{equation}\label{SamplingSigDef}
+%     y\left( t \right) = {a_1}\cos \left( {{\omega _1}t} \right) + {a_2}\cos \left( {{\omega _2}t} \right).
+% \end{equation}   
+% To study where cusps occur, we first examine loops in the phase-plane that do not enclose the origin. As the signal goes through such a loop, the Hilbert phase slows, stops, reverses, stops again, and then proceeds forward. For the test signal, the time interval where the phase is decreasing (reversing) can be solved analytically by finding the period between stationary points of the Hilbert phase. The stationary points can be found by solving for times where the derivative of the IP is zero. For the test signal, an analytic form of the Hilbert phase can be found. The derivative of the analytic Hilbert phase is 
+% \begin{eqnarray}
+%     \frac{d\phi_y(t)}{dt}&=&0.5(\omega_2 + \omega_1) + 0.5(\omega_2 - \omega_1)\frac{a_2^2-a_1^2}{A^2(t)} \\
+%     A^2(t) &=& a_1^2 + a_2^2 + 2a_1^2a_2^2cos((\omega_2-\omega_1)t).
+% \end{eqnarray}
+% The derivative of the Hilbert phase is zero where
+% \begin{equation}\label{StationaryPhaseTimes}
+%     t=\frac{1}{\omega_2-\omega_1}\arccos\left(-\frac{a_1^2\omega_1 + a_2^2\omega_2}{(\omega_2 +
+%     \omega_1)a_1^2a_2^2}\right)+\frac{1}{\omega_2-\omega_1}2\pi k,
+% \end{equation}
+% where $k=1,2,...$ and the phase reversal period is (see Appendix~\ref{ReversalPeriodDerivation} for derivation) 
+% \begin{eqnarray}\label{PhaseReversalPeriod}
+%     T=\frac{2}{\omega_2-\omega_1}\arccos\left(g\left(a_1,a_2,\omega_1,\omega_2\right)\right) \\ 
+% g\left(a_1,a_2,\omega_1,\omega_2\right) = \frac{a_1^2\omega_1 + a_2^2\omega_2}{(\omega_2 +
+%     \omega_1)a_1^2a_2^2}.
+% \end{eqnarray}
+% For this test signal the sampling rate, $F_s$, must satisfy
+% \begin{equation}
+%     F_s \ge \frac{2}{T}
+% \end{equation}
+% to guarantee no cusps will be present. If $g>1$, then it becomes a complex quantity and cusps will be present irrespective of the sampling frequency. These are intrinsic cusps of the signal. If $g=1$ the cusps will be pointed and the CPT will map them as full oscillations. Small errors will occur when the segment used to fit the circle overlaps the point of the cusp. These errors occur because the fitted circle center will be on the incorrect side of the arc at the cusp. These errors will be detected and corrected by the methods explained in Section~\ref{sect:ComputingCPTSection}. However, when $g \gg 1$ the cusps become rounded and the CPT no longer maps them as full oscillations. 
 % 
 % Examples of the CPT mapping for $g<1$, $g=1$ and $g>1$ are shown in Fig.~\ref{Cusps}. The left column of the Figure shows $y(n)$ (plotted with dashed black line) and $x_1(n)$ (in red). The IP estimates in this column where found using $Q=4$. The CPT mapped the small loops (upper plot in column) and the pointed cusps (middle plot) as full oscillations. When the cusp become rounded in the lower plot the CPT was unable to map it as a full oscillation. 
 % 
