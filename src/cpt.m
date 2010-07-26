@@ -82,6 +82,7 @@ for n=StartSample:EndSample
         Find_All_Circle_Parameters_And_Tangents(MaxPoints, InitialPoints, PointsStep, ...
         y_s_all, Hy_s_all, x_previous, Hx_previous);
     
+    
     if PlotMode == 1
         hold on
         plot(x0_temp,Hx0_temp,'+')
@@ -129,24 +130,35 @@ for n=StartSample:EndSample
             
         else
             
-            [p1 p2] = Calculate_Priors(r_temp, phi_temp, r(last_good_mapping_index), phi(last_good_mapping_index));
+%             [p1 p2] = Calculate_Priors(r_temp, phi_temp, r(last_good_mapping_index), phi(last_good_mapping_index));
             % p1 is the difference between consectutive phases
             % p2 is the amplitude-phase relationship (should be  > 0)
-            
-%             p1=0.01;
-%             p2 = 0.1;
-            
+            r_previous = r(last_good_mapping_index);
+            phi_previous = phi(last_good_mapping_index);
+            PhaseErrorFactor = 2.;
             p = n-last_good_mapping_index;                  % this is the number of samples back for the last good estimate.
             beta_p = p*pi / rho;
-            alpha_p = beta_p - 2*pi;
+            alpha_p = PhaseErrorFactor*beta_p - 2*pi;
             
-            PhaseErrorFactor = 2;
-%             Indexes_From_p1 = ((p1<PhaseForwardThresh) & (p1 > 0)) | (p1<PhaseJumpThresh);
 
-            % need to unwrap phase here!!!!
+            % check if 2pi transition has occurred
+            p1 = (phi_temp+pi) - (phi_previous+pi) ;
+            IndexesFrom2piTransition = p1<alpha_p;
+            
+            % create a vector to add 2pi where appropriate
+            PhaseAdditionVector = IndexesFrom2piTransition*2*pi;
 
-            Indexes_From_p1 = ((p1<=PhaseErrorFactor*beta_p) & (p1 >= 0)) | (p1<=alpha_p);
-            Indexes_From_p1_and_p2 = (((p1<=PhaseErrorFactor*beta_p) & (p1 >= 0)) | (p1<alpha_p)) & (p2>0);
+            p1 = ((phi_temp+pi) + PhaseAdditionVector) - (phi_previous+pi) ;  % check to see if the phase is increasing (obviously will not work at point of 2pi phase transition)
+                
+                % now check the other phase conditions and add 2pi where
+                % required
+                
+            dr = r_temp - r_previous;
+            p2 = abs(p1) - 1*abs(dr);        % motivated by the Bedrosian theorem, must be > 0
+            
+            %
+            Indexes_From_p1 = (p1<=PhaseErrorFactor*beta_p) & (p1 >= 0) ;
+            Indexes_From_p1_and_p2 = ((p1<=PhaseErrorFactor*beta_p) & (p1 >= 0)) & (p2>0);
 
             if sum(Indexes_From_p1) > 0         % if this is not satisfied than we have to assign NaN
 
