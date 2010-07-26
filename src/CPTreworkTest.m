@@ -22,10 +22,10 @@ drawnow
 figure
 plot(y)
 
-InitialPoints = 4;
-PointsStep = 2;
-UpperLimit = 50;
-PlotMode = 0;
+InitialPoints = 10;
+PointsStep = 4;
+UpperLimit = 100;
+PlotMode = 1;
 
 [IF_interp, phi_interp, phi_unwrapped, x, Hx, r, phi, x0, Hx0, m_star, M] = cpt(y, InitialPoints, UpperLimit, PointsStep, Ts, PlotMode,f_max);
 % N_imfs = 3;

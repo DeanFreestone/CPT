@@ -79,7 +79,8 @@ for n=StartSample:EndSample
     
     % here we calculate the candidates and the cost functions
     [x0_temp Hx0_temp r_temp phi_temp x_temp Hx_temp M_temp e d Norm] =...
-        Find_All_Circle_Parameters_And_Tangents(MaxPoints, InitialPoints, PointsStep, y_s_all, Hy_s_all, x_previous, Hx_previous);
+        Find_All_Circle_Parameters_And_Tangents(MaxPoints, InitialPoints, PointsStep, ...
+        y_s_all, Hy_s_all, x_previous, Hx_previous);
     
     if PlotMode == 1
         hold on
@@ -132,16 +133,20 @@ for n=StartSample:EndSample
             % p1 is the difference between consectutive phases
             % p2 is the amplitude-phase relationship (should be  > 0)
             
+%             p1=0.01;
+%             p2 = 0.1;
+            
             p = n-last_good_mapping_index;                  % this is the number of samples back for the last good estimate.
-            beta_p = 2*p*pi/rho;
+            beta_p = p*pi / rho;
             alpha_p = beta_p - 2*pi;
             
+            PhaseErrorFactor = 2;
 %             Indexes_From_p1 = ((p1<PhaseForwardThresh) & (p1 > 0)) | (p1<PhaseJumpThresh);
 
             % need to unwrap phase here!!!!
 
-            Indexes_From_p1 = ((p1<=beta_p) & (p1 >= 0)) | (p1<=alpha_p);
-            Indexes_From_p1_and_p2 = (((p1<=beta_p) & (p1 >= 0)) | (p1<alpha_p)) & (p2>0);
+            Indexes_From_p1 = ((p1<=PhaseErrorFactor*beta_p) & (p1 >= 0)) | (p1<=alpha_p);
+            Indexes_From_p1_and_p2 = (((p1<=PhaseErrorFactor*beta_p) & (p1 >= 0)) | (p1<alpha_p)) & (p2>0);
 
             if sum(Indexes_From_p1) > 0         % if this is not satisfied than we have to assign NaN
 

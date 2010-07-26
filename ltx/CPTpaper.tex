@@ -196,24 +196,23 @@ where $x(t) \in \mathbb{R}$ is an oscillatory component and $\varepsilon(t) \sim
 \begin{equation}\label{eq:InstAmplitudeAndPhase}
     x\left( t \right) = r\left( t \right)\cos \left( {\phi \left( t \right)} \right) + x_0(t),
 \end{equation}
-where $r(t)$ denotes the IA, $\phi(t)$ denotes the IP and $x_0(t)$ denotes an offset that will be modeled as the circle center. Note, the offset is assumed to be varying on a slow time-scale such that is can be filtered out in a pre-processing step, thus can be ignored. In the noise-free case, the IA is
+where $r(t)$ denotes the IA, $\phi(t)$ denotes the IP and $x_0(t)$ denotes an offset that will be modeled as the circle center. Note, the offset is assumed to be varying on a slow time-scale such that is can be filtered out in a pre-processing step, thus is assumed to be at the origin for clarity of argument. In the noise-free case, the IA is
 \begin{equation}\label{eq:IADef}
     r\left( t \right) = \left( x(t)^2 + \mathcal{H}x(t)^2\right)^{1/2}.
 \end{equation}
 For a smooth continuous oscillatory signal, the IA will satisfy
 \begin{equation}\label{eq:IAlimitingCase}
-\mathop {\lim }\limits_{\tau  \to 0} \left( r\left( t \right) - r\left( t + \tau \right) \right) = 0,
+\mathop {\lim }\limits_{\tau  \to 0} \left( r\left( t \right) - r\left( t + \tau \right) \right) = 0.
 \end{equation}
 Naturally, it follows that for a small finite time interval, $\Delta t$, we have
 \begin{equation}\label{eq:IA_small_time_interval}
-    r(t)-r(t-\Delta t) < \eta
+    r(t)-r(t-\Delta t) < \eta,
 \end{equation}
 where $\eta \in \mathbb{R}$ is a small constant. Equations~\ref{eq:IADef}, \ref{eq:IAlimitingCase}, and \ref{eq:IA_small_time_interval} simply state that given a sufficiently small segment of data the local oscillatory component $x(t)$ can be approximated by an arc of a circle in the phase-plane or, equivalently, a sinusoid in the time domain. In the noise-free case, the IP of $x(t)$ is
 \begin{equation}\label{IPdef}
     \phi \left( t \right) = \arctan \left( \frac{\mathcal{H}x\left( t \right)}
     {x\left( t \right)} \right).
 \end{equation}
-
 % this bit is commented out because we are not comparing the CPT to the DQ method
 % ~~~~~~~~~~~~~~~
 % An example of an IF estimate using the CPT is provided in Fig.~\ref{CompareWithDQ}, where we compare the Hilbert-Huang transform, the direct quadrature method (DQ), and the CPT. For this example, we used the test signal 
@@ -222,7 +221,6 @@ where $\eta \in \mathbb{R}$ is a small constant. Equations~\ref{eq:IADef}, \ref{
 % \end{equation}
 % This test signal was chosen since it was used as an example in~\cite{Huang2008} for demonstrating problems of having non-quadrature Hilbert transforms, which results in an underestimate of the IF when using the HHT. The DQ method and the CPT both provide very good IF estimates. The HHT IF estimates are inaccurate due to having a non-quadrature analytic signal for the IMF. The DQ method overcomes the limitations described in the Nuttall theorem via normalizing the IMFs prior to computing the analytic signal. The CPT overcomes the limitations of the Nuttall theorem by enforcing a circular structure in the phase-plane. The DQ method has some minor problems in estimating the IF at points corresponding to extrema of the time-series. This is a consequence of the normalization procedure. 
 % ~~~~~~~~~~~~~~~
-
 An advantage of the CPT over the HHT comes from modelling the signal trajectory allowing for the inclusion of a disturbance term. In addition, the sifting process distorts the IA estimates (as seen in Fig.~\ref{fig:HHTDemo}). Since the CPT does not rely on sifting, meaningful IA estimates are obtained.
 % advantage of the CPT method over the HHT is that it does not rely on the sifting process, allowing for inflections to be handled in a more consistent manner. Another 
 
@@ -293,7 +291,7 @@ where an incorrect estimate is detected with the condition
 If no candidate circle center satisfies this condition at a particular point, then the IP and IA cannot be estimated for that sample using this method. These values must be interpolated at the completion of the estimation procedure. 
 
 \subsubsection{Incorrect Phase Change}
-The candidate circle fits are further constrained using prior information of the phase progression. From our fundamental definition of IP, the unwrapped phase is monotonically increasing in time except at $2\pi$ phase transitions. Under the assumption that the offset, $x_0(n)$, is varying on a much slower time-scale than the oscillatory component, $x(n)$, a phase increment threshold and a phase transition threshold can be derived given knowledge of the sampling rate and the maximum frequency of interest in the signal. To begin the derivation, an oversampling parameter is defined based on the Nyquist sampling theorem as
+The candidate circle fits are further constrained using prior information of the phase progression. From our fundamental definition of IP, the unwrapped phase is monotonically increasing in time except at $2\pi$ phase transitions. A phase increment threshold and a phase transition threshold can be derived given knowledge of the sampling rate and the maximum frequency of interest in the signal. To begin the derivation, an oversampling parameter is defined based on the Nyquist sampling theorem as
 \begin{equation}
 	\rho\triangleq\frac{F_s}{2f_{max}},
 \end{equation}
@@ -316,7 +314,7 @@ At a $2\pi$ phase transition, the maximum phase decrement in radians is
 \end{equation}
 Following this, the phase evolution should also satisfy
 \begin{equation}\label{eq:Prior2}
-\alpha \ge \hat{\phi} \left( n,\kappa \right) - \hat{\phi} \left( n-1,\kappa^* \right). 
+\hat{\phi} \left( n+1,\kappa \right) - \hat{\phi} \left( n,\kappa^* \right) \le \alpha. 
 \end{equation}
 
 If the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1}, and~\ref{eq:Prior2} are not satisfied for all candidates from the previous sample, $n-1$, than parameters corresponding to an earlier sample, $n-p$, where the conditions are satisfied is used. Following this, we need to re-evaluate the thresholds used in Eq.~\ref{eq:Prior1} and~\ref{eq:Prior2} to
@@ -329,16 +327,16 @@ Note that in order for the threshold $\alpha_p$ to be useful, it must be negativ
 	p < 2\rho.
 \end{equation}
 
-\subsubsection{Amplitude-Frequency Relationship}
-The condition described in this section is designed to limit erroneous fluctuations in the IA estimates. The Bedrosian theorem states that the frequency content of the IA component should be lower than the frequency content of the IP component. Therefore, parameters corresponding to candidate circle fits should satisfy
+\subsubsection{Incorrect Amplitude-Frequency Relationship}
+The condition described in this section is designed to limit erroneous fluctuations in the IA estimates. The Bedrosian theorem states that the frequency content of the IA component should be lower than the frequency content of the IP component. Therefore, according to Eq.~\ref{eq:BedrosianCondition} parameters corresponding to candidate circle fits should satisfy
 \begin{equation}
-	\mathcal{F}\{\hat{r}\left(n,\kappa\right)\} < \frac{d\hat{\phi}\left(n,\kappa \right)}{dt}=\omega(n).
+	\omega_1 < \frac{d\hat{\phi}\left(n,\kappa \right)}{dt}=\omega(n),
 \end{equation}
-In practice, this condition cannot be used to check the integrity of the estimated parameters since the Fourier transform of the instantaneous amplitude cannot be calculated as the parameters are updated. However, we can approximate this condition using
+where $\omega_1$ is the highest spectral component of the IA. In practice, this condition cannot be used to check the integrity of the estimated parameters since the Fourier transform of the IA cannot be calculated as the parameters are updated. However, we can approximate this condition using
 \begin{equation}\label{eq:Prior3}
-    \left| {\hat{r}\left(n,\kappa\right) - \hat{r}\left(n-p,\kappa^*\right)} \right| < \hat{\phi}\left(n,\kappa \right) - \hat{\phi}\left(n-p,\kappa^*\right).
+    \left| {\hat{r}\left(n,\kappa\right) - \hat{r}\left(n-p,\kappa^*\right)} \right| < \hat{\phi}\left(n,\kappa \right) - \hat{\phi}\left(n-p,\kappa^*\right),
 \end{equation}
-Since this condition is only loosely based on the Bedrosian theorem, it is used as guide and not a hard rule. If this condition is satisfied for any candidate circle fits then only those fits will be used. However, if the condition is not satisfied for any candidate circle fits then the condition is not used.
+which states the change in the IA estimate must be less than the change in the IP estimate. Since this condition is only loosely based on the Bedrosian theorem, it is used as guide and not a hard rule. If this condition is satisfied for any candidate circle fits then only those fits will be used. However, if the condition is not satisfied for any candidate circle fits then the condition is not used.
 
 \subsection{Selecting Best Parameters}\label{sect:BestParameters}
 To select the best segment size, we exploit the fact that in the noise-free case the CPT should preserve the relative distance and angle in the phase-plane between consecutive data points of the original signal in the mapped signal. In other words, the mapping can be considered a translation of the origin (to the offset $\mathbf{p}_{x_0}\left(n\right)$), maintaining the local structure of the data. The preservation of the data structure is measured using the distance mismatch (DM) between samples in $\mathbf{p}_y(n)$ and $\mathbf{p}_x(n,\kappa)$. 
