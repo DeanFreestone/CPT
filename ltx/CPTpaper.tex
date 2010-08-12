@@ -196,9 +196,11 @@ where $x(t) \in \mathbb{R}$ is an oscillatory component and $\varepsilon(t) \sim
 \begin{equation}\label{eq:InstAmplitudeAndPhase}
     x\left( t \right) = r\left( t \right)\cos \left( {\phi \left( t \right)} \right) + x_0(t),
 \end{equation}
-where $r(t)$ denotes the IA, $\phi(t)$ denotes the IP and $x_0(t)$ denotes an offset that will be modeled as the circle center. Note, the offset is assumed to be varying on a slow time-scale such that is can be filtered out in a pre-processing step, thus is assumed to be at the origin for clarity of argument. In the noise-free case, the IA is
+where $r(t)$ denotes the IA and $\phi(t)$ denotes the IP. The term $x_0(t)$ denotes an offset that is assumed to be varying on a slow time-scale such that it can be filtered out in a pre-processing step or modeled as the circle center; henceforth, the offset is assumed to be at the origin. 
+
+In the noise-free case, the IA is
 \begin{equation}\label{eq:IADef}
-    r\left( t \right) = \left( x(t)^2 + \mathcal{H}x(t)^2\right)^{1/2}.
+    r\left( t \right) = \left( x^2(t) + \mathcal{H}x^2(t)\right)^{1/2}.
 \end{equation}
 For a smooth continuous oscillatory signal, the IA will satisfy
 \begin{equation}\label{eq:IAlimitingCase}
@@ -295,17 +297,17 @@ The candidate circle fits are further constrained using prior information of the
 \begin{equation}
 	\rho\triangleq\frac{F_s}{2f_{max}},
 \end{equation}
-where $\rho \in \mathbb{R} \ge 1$, $F_s$ is the sampling frequency, and $f_{max}$ is the maximum frequency of interest in the signal. Under the assumption that the IP estimate at sample $n$ is accurate, the phase estimate at sample $n+1$ should satisfy
+where $\rho \in \mathbb{R} \ge 1$, $F_s$ is the sampling frequency, and $f_{max}$ is the maximum frequency of interest in the signal. Under the assumption that the IP estimate at sample $n-1$ is accurate, the phase estimate at sample $n$ should satisfy
 \begin{equation}
-	0 < \hat\phi(n+1,\kappa)-\hat\phi(n,\kappa^*) < \beta
+	0 < \hat\phi(n,\kappa)-\hat\phi(n-1,\kappa^*) < \beta
 \end{equation}
 where 
 \begin{equation}
 	\beta = \frac{\pi}{\rho}
 \end{equation}
-and $\kappa^*$ indexes the best parameter estimates according to the criteria described below in Section~\ref{sect:BestParameters}. Now consider the next IP estimate at the sample $n+2$. The error in the previous estimate is bounded by $\beta$, so the error in the next estimate must satisfy
+and $\kappa^*$ indexes the best parameter estimates according to the criteria described below in Section~\ref{sect:BestParameters}. Now consider the next IP estimate at the sample $n+1$. The error in the previous estimate is bounded by $\beta$, so the error in the next estimate must satisfy
 \begin{equation}\label{eq:Prior1}
-	0 < \hat\phi(n+2,\kappa)-\hat\phi(n+1,\kappa^*) < 2\beta
+	0 < \hat\phi(n+1,\kappa)-\hat\phi(n,\kappa^*) < 2\beta
 \end{equation} 
 
 At a $2\pi$ phase transition, the maximum phase decrement in radians is
@@ -314,7 +316,7 @@ At a $2\pi$ phase transition, the maximum phase decrement in radians is
 \end{equation}
 Following this, the phase evolution should also satisfy
 \begin{equation}\label{eq:Prior2}
-\hat{\phi} \left( n+1,\kappa \right) - \hat{\phi} \left( n,\kappa^* \right) \le \alpha. 
+\hat{\phi} \left( n,\kappa \right) - \hat{\phi} \left( n-1,\kappa^* \right) \le \alpha. 
 \end{equation}
 
 If the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1}, and~\ref{eq:Prior2} are not satisfied for all candidates from the previous sample, $n-1$, than parameters corresponding to an earlier sample, $n-p$, where the conditions are satisfied is used. Following this, we need to re-evaluate the thresholds used in Eq.~\ref{eq:Prior1} and~\ref{eq:Prior2} to
@@ -338,24 +340,24 @@ where $\omega_1$ is the highest spectral component of the IA. In practice, this 
 \end{equation}
 which states the change in the IA estimate must be less than the change in the IP estimate. Since this condition is only loosely based on the Bedrosian theorem, it is used as guide and not a hard rule. If this condition is satisfied for any candidate circle fits then only those fits will be used. However, if the condition is not satisfied for any candidate circle fits then the condition is not used.
 
-\subsection{Selecting Best Parameters}\label{sect:BestParameters}
-To select the best segment size, we exploit the fact that in the noise-free case the CPT should preserve the relative distance and angle in the phase-plane between consecutive data points of the original signal in the mapped signal. In other words, the mapping can be considered a translation of the origin (to the offset $\mathbf{p}_{x_0}\left(n\right)$), maintaining the local structure of the data. The preservation of the data structure is measured using the distance mismatch (DM) between samples in $\mathbf{p}_y(n)$ and $\mathbf{p}_x(n,\kappa)$. 
+\subsection{Parameter Selection}\label{sect:BestParameters}
+To account for nonstationarities in the amplitude and frequency content of the signal and to account for various noise levels, it is important to find candidate parameters using different segment sizes or arc lengths. To select the best segment size, we exploit the fact that in the noise-free case the CPT should preserve the relative distance and angle in the phase-plane between consecutive data points of the original signal in the mapped signal. In other words, the mapping can be considered a translation of the origin (to the offset $\mathbf{p}_{x_0}\left(n\right)$) or fitted circle center, maintaining the local structure of the data. The preservation of the data structure is measured using the distance mismatch (DM) between samples in $\mathbf{p}_y(n)$ and $\mathbf{p}_x(n,\kappa)$. 
 
-To derive the DM, we first define
+To derive the DM, we first define the vectors
 \begin{align}
 	\mathbf{v}_1\left( n,\kappa \right) &= \mathbf{p}_x(n,\kappa)-\mathbf{p}_x(n-m,\kappa^*) \label{v1} \\
 	\mathbf{v}_2\left( n \right) &= \mathbf{p}_y(n)-\mathbf{p}_y(n-m), \label{v2}
 \end{align}
-where $n-m$ is the sample at the edge of the arc used to fit the candidate circle (and varies with the different candidate arc lengths). The DM, denoted by $d\left( {n,\kappa} \right)$, is calculated by
+where $n-m$ is the sample at the edge of the arc used to fit the candidate circle (and varies with the different candidate arc lengths). The DM, denoted as $d\left( {n,\kappa} \right)$, is calculated by
 \begin{equation}\label{eq:relative_distance_mismatch}
     d\left( {n,\kappa} \right) = \|\mathbf{v}_2\left( n \right)-\mathbf{v}_1\left( n,\kappa \right)\|_2.
 \end{equation}
 If the mapping is a translation of the origin that preserves the original data structure, then the Euclidean distance between $\mathbf{v}_1$ and $\mathbf{v}_2$ will be zero. Therefore, the index for the best candidate circle fit is
 \begin{equation}\label{Kappa_star}
-\kappa^* = \arg \mathop{\min} \limits_\kappa d\left( n,\kappa \right).
+	\kappa^* = \arg \mathop{\min} \limits_\kappa d\left( n,\kappa \right).
 \end{equation}
 
-By calculating the DM using points at the edge of the segment, the effect of noise is reduced. In addition, by using the point at the edge of the segment, the maximum arc size is controlled. If the arc length is too large for nonstationary signals then the trajectory of $\mathbf{p}_y(n)$ will not be an arc of a circle so the mapping will not be a translation of the origin. If the circle parameters at the trailing end of the segment do not satisfy the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1}, and~\ref{eq:Prior2} then $\mathbf{p}_x(n-m,\kappa^*)$ is not defined. In this case, the next sample in the arc must be used ($n-m+1$) to find $\mathbf{v}_1(n,\kappa)$. If the conditions are not satisfied for the sample $n-m+1$, then $n-m+2$ is used and so on. If no samples in the arc satisfy the conditions then an alternative cost function is used. 
+By calculating the DM using points at the edge of the segment, the effect of noise is reduced. This is because the acuity of the angle.. In addition, by using the point at the edge of the segment, the maximum arc size is controlled. If the arc length is too large for nonstationary signals then the trajectory of $\mathbf{p}_y(n)$ will not be an arc of a circle so the mapping will not be a translation of the origin. If the circle parameters at the trailing end of the segment do not satisfy the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1}, and~\ref{eq:Prior2} then $\mathbf{p}_x(n-m,\kappa^*)$ is not defined. In this case, the next sample in the arc must be used ($n-m+1$) to find $\mathbf{v}_1(n,\kappa)$. If the conditions are not satisfied for the sample $n-m+1$, then $n-m+2$ is used and so on. If no samples in the arc satisfy the conditions then an alternative cost function is used. 
 
 The alternative cost function selects a candidate arc that satisfies Eqs.~\ref{eq:IncorrectSideClassifier}, \ref{eq:Prior1}, and~\ref{eq:Prior2} and minimizes
 \begin{align}\label{BestCircFit2Reinitialize}
@@ -404,18 +406,63 @@ As mentioned above, a property of the DM is that it prevents over-fitting. For n
 \end{algorithmic}
 \end{algorithm}
 
-\section{CPT of Noisy Signals}\label{sect:NoisySignalsSection}
+\section{Examples}
+\subsection{Comparison to HT, HHT and NHT}
+\dean{Note: I need to make the test signal such that the normalisation will work over the time of analysis. Also, I need to comment on why it is such a pain in the butt.}
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[scale=1]{./Figures/TestSigForCompFig.eps}
+	\caption{Test signal for comparisons. The vertical lines mark the boundaries for different time groups within the signal where comparisons were made. }
+	\label{fig:label}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[scale=1]{./Figures/IPRMSECompFig.eps}
+	\caption{Comparison of the CPT to the HT, NHT and HHT. \textbf{A} show the RMSE of the the phase estimates over the duration entire test signal. \textbf{B} Shows the results for the first time period. \textbf{C} Shows the results for the middle time period. \textbf{D} Shows the results for the last time period.}
+	\label{fig:label}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[scale=1]{./Figures/TestSigForCompFig2.eps}
+	\caption{Test signal for comparisons. The vertical lines mark the boundaries for different time groups within the signal where comparisons were made. }
+	\label{fig:label}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[scale=1]{./Figures/IPRMSECompFig2.eps}
+	\caption{Comparison of the CPT to the HT, NHT and HHT. \textbf{A} show the RMSE of the the phase estimates over the duration entire test signal. \textbf{B} Shows the results for the first time period. \textbf{C} Shows the results for the middle time period. \textbf{D} Shows the results for the last time period.}
+	\label{fig:label}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[scale=1]{./Figures/TestSigForCompFig3.eps}
+	\caption{Test signal for comparisons. The vertical lines mark the boundaries for different time groups within the signal where comparisons were made. }
+	\label{fig:label}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[scale=1]{./Figures/IPRMSECompFig3.eps}
+	\caption{Comparison of the CPT to the HT, NHT and HHT. \textbf{A} show the RMSE of the the phase estimates over the duration entire test signal. \textbf{B} Shows the results for the first time period. \textbf{C} Shows the results for the middle time period. \textbf{D} Shows the results for the last time period.}
+	\label{fig:label}
+\end{figure}
+
+\subsection{CPT of Noisy Signals}\label{sect:NoisySignalsSection}
 This section demonstrates how the CPT performs when noise is present and compares the performance to the normalized Hilbert transform (NHT). For the demonstration we used a chirp with decreasing IA and additive Gaussian noise described by
 \begin{equation}
     y(t)=r\left(t\right)cos\left(\phi\left(n\right)\right) + \varepsilon \left( n \right).
 \end{equation}
-The frequency increases in a linear way from $f_{min}$ = 10 Hz at $n=1$ to $f_{max}$ = 100 Hz at $n=N$, the amplitude decreases in a linear way, where $r(1) = 3$, $r(N) = 0.5$, and $\varepsilon(n) \sim \mathcal{N}(0,\sigma^2)$. The sampling rate was 10~kHz and the data length used was 300 ms such that $N = 3000$. The standard deviation of the noise was varied from $0$ to $0.56$ in steps of $0.07$ (9 levels). The minimum number of points used to fit the arc was set to $Q_{min}=\frac{0.9F_s}{f_1}$. This choice reflects a trade-off for selecting the number of samples to get a satisfactory tangent estimate for the low and high frequency components of the chirp. In addition, further consideration \todo{DG: not sure what you mean here.} was given to allowing a sufficient number of points to estimate circle parameters for the high frequency low SNR components. For low noise signals, the optimal choice for the smallest segment size is $Q_{min}=\frac{0.5F_s}{f_1}$, which provides a tangent estimate using half the number of samples (semi-circle in the phase-plane) in the highest frequency period. As noise is introduced, more samples are required to estimate the tangent for the low frequency component to ensure the direction of the tangent follows the trajectory of the signal. The maximum number of points was set to $Q_{max} = 5Q_{min}$. This setting was a trade-off between computation complexity and a sufficient number of points to model the low frequency component of the chirp. The segment size was increased in steps of 2 between $Q_{min}$ and $Q_{max}$.
+The frequency increases in a linear way from $f_{min}$ = 10 Hz at $n=1$ to $f_{max}$ = 100 Hz at $n=N$, the amplitude decreases in a linear way, where $r(1) = 3$, $r(N) = 0.5$, and $\varepsilon(n) \sim \mathcal{N}(0,\sigma^2)$. The sampling rate was 10~kHz and the data length used was 300 ms such that $N = 3000$. The standard deviation of the noise was varied from $0$ to $0.56$ in steps of $0.07$ (9 levels). The minimum number of points used to fit the arc was set to $Q_{min}=\frac{0.9F_s}{f_{max}}$. This choice reflects a trade-off for selecting the number of samples to get a satisfactory tangent estimate for the low and high frequency components of the chirp. In addition, further consideration \todo{DG: not sure what you mean here.} was given to allowing a sufficient number of points to estimate circle parameters for the high frequency low SNR components. For low noise signals, the optimal choice for the smallest segment size is $Q_{min}=\frac{0.5F_s}{f_{max}}$, which provides a tangent estimate using half the number of samples (semi-circle in the phase-plane) in the highest frequency period. As noise is introduced, more samples are required to estimate the tangent for the low frequency component to ensure the direction of the tangent follows the trajectory of the signal. The maximum number of points was set to $Q_{max} = 5Q_{min}$. This setting was a trade-off between computation complexity and a sufficient number of points to model the low frequency component of the chirp. The segment size was increased in steps of 2 between $Q_{min}$ and $Q_{max}$.
 
 Since the IA of $y(n)$ is non-stationary, the SNR is also non-stationary. Therefore, the phase estimates were separated into $3$ groups, each corresponding to $100$~ms of the time series, to better approximate the SNR for benchmarking and comparison. The root mean squared error (RMSE) of the IP estimates were calculated for 100 realizations of the test signal using the NHT and the CPT. The calculation of the RMSE allowed for wrapping between $0$ and $2\pi$ of the IP estimates, such that the maximum possible error is less than $\pi$. All IMFs were calculated using the NHT, since we do not know the mode corresponding to the signal \emph{a priori}. The IMF of NHT with lowest RMSE for the middle group ($100-200$~ms) was used for the comparison, so edge effects did not influence the choice of the best IMF corresponding to the signal. 
 
 \begin{figure*}[htbp]\label{RMSEComparison}
     \centering
-        \includegraphics[scale=.4]{./Figures/SNRcomparisonFigure.eps}
+        \includegraphics[scale=1]{./Figures/SNRcomparisonFigure.eps}
     \caption{Comparison of the CPT IP estimates to the normalized Hilbert transform for noisy signals. Note; the whiskers show std dev. The red line shows the median, the box cover the data range, except for the outliers shown by red crosses.}
 \end{figure*}
 

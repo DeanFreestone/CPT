@@ -14,6 +14,8 @@ t= 0:Ts:T_max-Ts;                   % 10 seconds @ 1kHz sample rate
 f0 = 10;
 f1=100;                    % Start at 1 Hz, go up to 150 Hz
 
+f_max = f1;
+
 f_middle = f0+(f1-f0)/2;
 f = linspace(f0,f1,length(t));
 % true_IF_middle = f(Sample2Cut+1:end-Sample2Cut);
@@ -47,7 +49,7 @@ MS = 5;
 EdgeEffectTime = 0.02;
 EdgeEffectSample = round(EdgeEffectTime*Fs);
 t_start_sample = 1;
-NIterations = 100;
+NIterations = 200;
 
 snr_db_start = zeros(NIterations,length(sigma));
 snr_db_mid = zeros(NIterations,length(sigma));
@@ -87,7 +89,8 @@ for n=1:length(sigma)
         snr_end = (rms_y_end/rms_n_end)^2;
         snr_db_end(nn,n) = 10*log10(snr_end);
 
-        [IF_interp, phi_interp, phi_unwrapped, x, Hx, r, phi, x0, Hx0, m_star, M] = cpt_rework(y_n, MinPoints, MaxPoints, PointsStep, Ts, PlotMode);
+        [IF_interp, phi_interp, phi_unwrapped, x, Hx, r, phi, x0, Hx0, m_star, M] ...
+            = cpt(y_n, MinPoints, MaxPoints, PointsStep, Ts, PlotMode, f_max);
 
         phi_est = mod(phi_interp,2*pi);
 
@@ -143,8 +146,7 @@ for n=1:length(sigma)
 end
 toc
 
-
-y_max= 1.5;
+y_max = 2.5;
 FS = 16;
 roundlabelstart = round(10*mean(snr_db_start,1))/10;
 roundlabelmid = round(10*mean(snr_db_mid,1))/10;
@@ -159,7 +161,7 @@ xticklabelmid = fliplr(xticklabelmid);
 xticklabelend = fliplr(xticklabelend);
 
 subplotextension = 0.055;
-% boxplotfig = figure('units','normalized','position',[0 0 1 1]);
+boxplotfig = figure('units','normalized','position',[0 0 1 1]);
 ax(1) = subplot(2,3,4,'parent',boxplotfig,'units','normalized');
 boxplot(RMSE_start,roundlabelstart,'parent',ax(1))
 ylim(ax(1),[0 y_max])

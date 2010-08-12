@@ -130,7 +130,6 @@ for n=StartSample:EndSample
             
         else
             
-%             [p1 p2] = Calculate_Priors(r_temp, phi_temp, r(last_good_mapping_index), phi(last_good_mapping_index));
             % p1 is the difference between consectutive phases
             % p2 is the amplitude-phase relationship (should be  > 0)
             r_previous = r(last_good_mapping_index);
@@ -147,11 +146,9 @@ for n=StartSample:EndSample
             
             % create a vector to add 2pi where appropriate
             PhaseAdditionVector = IndexesFrom2piTransition*2*pi;
-
+            
+            % update p1 with 2pi phase transitions
             p1 = ((phi_temp+pi) + PhaseAdditionVector) - (phi_previous+pi) ;  % check to see if the phase is increasing (obviously will not work at point of 2pi phase transition)
-                
-                % now check the other phase conditions and add 2pi where
-                % required
                 
             dr = r_temp - r_previous;
             p2 = abs(p1) - 1*abs(dr);        % motivated by the Bedrosian theorem, must be > 0
