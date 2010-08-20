@@ -28,20 +28,29 @@ end
 true_IP = mod(true_IP,2*pi);
 
 A1 = 4;
-a = linspace(A1,.5,length(t));
-y = a.*chirp(t,f0,T_max,f1);
+A2 = 1;
+Envelope = linspace(A1,A2,length(t));
+% Envelope2 = [Envelope(1:round(length(Envelope)/2)) fliplr(Envelope(1:round(length(Envelope)/2)))];
+Envelope2 = [linspace(A1,A2,round(length(Envelope)/2)) linspace(A2,A1,round(length(Envelope)/2))];
+
+y = Envelope2.*chirp(t,f0,T_max,f1);
+figure
+plot(t,y,t,Envelope)
 % y_middle = y(Sample2Cut+1:end-Sample2Cut);
 
-sigma = 0.00:0.07:0.6;
+sigma = 0.0:0.07:0.6;
 
 PointMultiplier = 5;
-
 MinPoints = round(0.9*Fs/f1);
+
 MaxPoints = round(PointMultiplier*MinPoints);
-PointsStep = 2;
+PointsStep = 5;
 PlotMode = 0;
 
-PhaseFig  = figure('units','normalized','position',[0 0 1 1]);
+MaxPoints = floor((1/f_middle)*Fs/2)+100;
+MinPoints = floor((1/f_middle)*Fs/2);
+PointsStep = 20;
+
 FS = 16;
 LW = 1.6;
 MS = 5;
@@ -49,7 +58,9 @@ MS = 5;
 EdgeEffectTime = 0.02;
 EdgeEffectSample = round(EdgeEffectTime*Fs);
 t_start_sample = 1;
-NIterations = 200;
+NIterations = 10;
+
+f_max = f(end-EdgeEffectSample);
 
 snr_db_start = zeros(NIterations,length(sigma));
 snr_db_mid = zeros(NIterations,length(sigma));
@@ -61,8 +72,10 @@ RMSE_end = zeros(NIterations,length(sigma));
 s_1 = round(Fs*T_max/3);
 s_2 = round(2*Fs*T_max/3);
 
-plotmode = 0;
+plotmode = 1;
 tic
+PhaseFig  = figure('units','normalized','position',[0 0 1 1]);
+
 for n=1:length(sigma)
     disp(['iteration ' num2str(n) ' of ' num2str(length(sigma)) ' noise levels']) 
     
@@ -146,7 +159,7 @@ for n=1:length(sigma)
 end
 toc
 
-y_max = 2.5;
+y_max = 2;
 FS = 16;
 roundlabelstart = round(10*mean(snr_db_start,1))/10;
 roundlabelmid = round(10*mean(snr_db_mid,1))/10;
@@ -162,20 +175,20 @@ xticklabelend = fliplr(xticklabelend);
 
 subplotextension = 0.055;
 boxplotfig = figure('units','normalized','position',[0 0 1 1]);
-ax(1) = subplot(2,3,4,'parent',boxplotfig,'units','normalized');
+ax(1) = subplot(1,3,1,'parent',boxplotfig,'units','normalized');
 boxplot(RMSE_start,roundlabelstart,'parent',ax(1))
 ylim(ax(1),[0 y_max])
 pos = get(ax(1),'position');
 set(ax(1),'xtick',1:9,'xticklabel',xticklabelstart,'fontsize',FS,'position',[pos(1)-subplotextension/2 pos(2) pos(3)+subplotextension pos(4)])
 ylabel(ax(1),'RMSE CPT','fontsize',FS)
 
-ax(2) = subplot(2,3,5,'parent',boxplotfig,'units','normalized');
+ax(2) = subplot(1,3,2,'parent',boxplotfig,'units','normalized');
 boxplot(RMSE_mid,roundlabelmid,'parent',ax(2))
 ylim(ax(2),[0 y_max])
 pos = get(ax(2),'position');
 set(ax(2),'xtick',1:9,'xticklabel',xticklabelmid,'yticklabel',{''},'fontsize',FS,'position',[pos(1)-subplotextension/2 pos(2) pos(3)+subplotextension pos(4)])
 
-ax(3) = subplot(2,3,6,'parent',boxplotfig,'units','normalized');
+ax(3) = subplot(1,3,3,'parent',boxplotfig,'units','normalized');
 boxplot(RMSE_end,roundlabelend,'parent',ax(3))
 ylim(ax(3),[0 y_max])
 pos = get(ax(3),'position');

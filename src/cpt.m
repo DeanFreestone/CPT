@@ -1,5 +1,5 @@
 
-function [IF_interp, phi_interp, phi_unwrapped, x, Hx, r, phi, x0, Hx0, m_star, M] = cpt(y, InitialPoints, UpperLimit, PointsStep, Ts, PlotMode, f_max)
+function [IF_interp, phi_interp, phi_unwrapped, x, Hx, r, phi, x0, Hx0, m_star, M] = cpt(y, InitialPoints, UpperLimit, PointsStep, Ts, PlotMode, f_max, Samples_For_Tangent)
 
 MS = 6;
 
@@ -11,7 +11,8 @@ YLimits = [Min_y Max_y];
 
 rho = 1/(Ts*2*f_max);           % this is the over sampling parameters
 
-Samples_For_Tangent = InitialPoints;       % must be an odd number
+% Samples_For_Tangent = InitialPoints;       % must be an odd number
+SamplesEitherSide4Tangent = floor(Samples_For_Tangent/2);   
 
 % we assume y is a NSamples x 1 vector
 [NSamples NCols] = size(y);
@@ -60,7 +61,17 @@ for n=StartSample:EndSample
     y_s_all = y(n-PointsFromCenter:n+PointsFromCenter);                 % take our segment of data
     Hy_s_all = Hy(n-PointsFromCenter:n+PointsFromCenter);               % the seg size is the maximum for as specified for this data point
     
-    [z a] = Get_Tangent_and_Normal_Vectors(Samples_For_Tangent,y_s_all, Hy_s_all);   
+    if PointsFromCenter >= SamplesEitherSide4Tangent
+        Tangent = [y(n+SamplesEitherSide4Tangent) - y(n-SamplesEitherSide4Tangent)
+            Hy(n+SamplesEitherSide4Tangent) - Hy(n-SamplesEitherSide4Tangent)];
+    else
+        Tangent = [y(n+PointsFromCenter) - y(n-PointsFromCenter)
+            Hy(n+PointsFromCenter) - Hy(n-PointsFromCenter)];
+    end
+    a = [Tangent(2) 
+        - Tangent(1)];      % norm
+
+%     [z a] = Get_Tangent_and_Normal_Vectors(Samples_For_Tangent,y_s_all, Hy_s_all);   
     
     if PlotMode == 1
         plot(y_s_all,Hy_s_all,'k*')
@@ -81,8 +92,7 @@ for n=StartSample:EndSample
     [x0_temp Hx0_temp r_temp phi_temp x_temp Hx_temp M_temp e d Norm] =...
         Find_All_Circle_Parameters_And_Tangents(MaxPoints, InitialPoints, PointsStep, ...
         y_s_all, Hy_s_all, x_previous, Hx_previous);
-    
-    
+%     plot(Norm),drawnow
     if PlotMode == 1
         hold on
         plot(x0_temp,Hx0_temp,'+')
@@ -92,8 +102,12 @@ for n=StartSample:EndSample
         axis square
     end
     
+%     X = -[x_temp' Hx_temp'];
+    lambda = -[x_temp' Hx_temp']*a;
+%     lambda = (X*a)';
+    
     % if lambda < 0 then circle is on the correct side
-    lambda = Check_Circle_Center(y(n), Hy(n), x0_temp, Hx0_temp, x_temp, Hx_temp, a);
+%     lambda = Check_Circle_Center(y(n), Hy(n), x0_temp, Hx0_temp, x_temp, Hx_temp, a);
 %     lambda = Check_Circle_Center(y(n), Hy(n), x0_temp, Hx0_temp, x_temp, Hx_temp, Norm);
     
     if sum(lambda<0) == 0
@@ -116,7 +130,7 @@ for n=StartSample:EndSample
         d = d(lambda<0);
 
         last_good_mapping_index = find(flag(1:n-1)==0,1,'last');        % we will use this index with our priors
-        
+%         last_good_mapping_index  =[];
         if isempty(last_good_mapping_index)             % if it is empty no candidate satisfied the conditions
             
             [e_star(n) m_star(n)] = min(abs(e));

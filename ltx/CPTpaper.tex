@@ -151,7 +151,9 @@ y\left( t \right) = a_1\cos \left(\omega_1t\right) + a_2\cos \left( \omega _2t \
 \end{equation}
 where $\omega = 2\pi f$, $f_1 = 7$ Hz, $f_2 = 17$ Hz, and $a_1 = f_1^{-1}$, $a_2=f_2^{-1}$. The example shows the four iterations, ordered from top to bottom, that were required to extract the first IMF. The sifting removes amplitude modulations and forms narrow-band components~\cite{Huang1998} allowing for estimation of the instantaneous properties using the Hilbert transform. The implementation of the HHT used in all of the examples in this paper is publicly available from the MathWorks File Exchange website~\cite{Tan2008}. The HHT has proved very useful in a range of disciplines involving nonlinear, nonstationary signal processing. Applications include electroencephalography (EEG) signal analysis~\cite{Wang2008}, nonlinear system identification and structural health monitoring~\cite{Pai2008}.
 
-A recent advance in the Hilbert-Huang transform involves normalization of the IMFs before computing the Hilbert transform~\cite{Huang2005}. The normalization is designed to separate the amplitude modulated and frequency modulated terms. By removing the IA component (or making it constant), the limitations stated in the Nuttall theorem~\cite{Nuttall1966} are addressed (improving the underestimates of the IF). However, the IF is still underestimated for non-trivial signals. This short coming led to the development of the direct quadrature method, where the IP is estimated by simply taking the inverse cosine of the normalized IMFs. This provides a further improved IF estimate.
+A recent advance in the Hilbert-Huang transform involves normalization of the IMFs before computing the Hilbert transform~\cite{Huang2005}. The normalization is designed to separate the amplitude modulated and frequency modulated terms. By removing the IA component (or making it constant), the limitations stated in the Nuttall theorem~\cite{Nuttall1966} are addressed (improving the underestimates of the IF). However, the IF is still underestimated for non-trivial signals. This short coming led to the development of the direct quadrature method, where the IP is estimated by simply taking the arccosine of the normalized IMFs. This provides a further improved IF estimate; however, problems occur with the estimation of the phase at times corresponding to the extrema of the signal if the normalization is $>1$, which is technically hard to achieve. This is because the arccosine of a signal is not defined (or complex) at points where the extrema are $>1$. 
+
+A problem with the standard EMD is that it can not deal with noise or disturbances in a consistent manner, where noise and signal may get mixed into different IMFs~\cite{Wu2009}. The most recent development in the HHT is ensemble empirical mode decomposition (EEMD), which deals with this problem of intra-mode mixing~\cite{Wu2009}. The EEMD is inspired by the noise-added analyses of Flandrin et al.~\cite{Flandrin2005} and Glendhill~\cite{Gledhill2003} and extends findings from other recent studies concerning the statistical properties of the EMD and white noise~\cite{Flandrin2004,Wu2004}. The EEMD defines the a true IMF as the mean of an ensemble of realizations, each consisting of the signal with different additive white noise. By adding white noise to the data, the EEMD acts like a dyadic filter bank enabling the correct separation of scales.
 
 \begin{figure}
 \begin{center}
@@ -161,27 +163,28 @@ A recent advance in the Hilbert-Huang transform involves normalization of the IM
 \end{center}
 \end{figure}
 
-The HHT has proved very useful; however, there are several issues concerning the interpretation of IMFs. For example, the physical meaning of the IA estimates from the HHT is not clear. This is due to amplitude distortions caused by the iterative sifting process (the distortion of the IA can be seen in Fig.~\ref{fig:HHTDemo}). In addition, the HHT has no allowance for disturbances or noise in the signal. If a signal is noisy, then the noise might be accounted for by a particular IMF (for high frequency noise than this will be the first IMF). However, there is no guarantee that the noise will not be mixed across more than one IMF. This issue is further elaborated in \dean{ref}. Furthermore, HHT IMFs are formed by interpolating extrema that may be relatively sparse in time, contradicting the notion of finding local instantaneous properties of a signal. This issue is highlighted by considering points of inflection in a signal. The way in which inflection points are handled depends on the amplitude of extrema on either side of the inflection. Under certain conditions inflections may become full oscillations or remain inflections from the sifting. This problem affects the standard HHT, the normalized HHT, and the direct quadrature methods since they all involve sifting. Fig.~\ref{fig:HHTAmbiguity} provides an example of where inflection points cause problems for the HHT. For this example, we use the signal 
-\begin{eqnarray}\label{eq:HHTAmbiguityTestSig}
-y\left( t \right) &=& \cos \left( \psi \left( t \right) \right) \\
-\psi \left( t \right) &=& 2\pi ft + \cos \left( {2\pi ft} \right),
-\end{eqnarray}
-where $f=4$~Hz. The example illustrates how the sifting process can yield different results depending on where extrema occur. The inclusion of an extra maxima, by extending the data length by 100 ms (from Fig.~\ref{fig:HHTAmbiguity} B. to C.) changes the demodulation of the inflection points from phase distortions to full oscillations.
+The HHT has proved very useful; however, there are several issues concerning the interpretation of IMFs. For example, the physical meaning of the IA estimates from the HHT is not clear. This is due to amplitude distortions caused by the iterative sifting process (the distortion of the IA can be seen in Fig.~\ref{fig:HHTDemo}). Furthermore, HHT IMFs are formed by interpolating extrema that may be relatively sparse in time, contradicting the notion of finding local instantaneous properties of a signal. These issues effect the standard HHT, the normalized HHT, and the direct quadrature methods since they all involve sifting. 
+%Fig.~\ref{fig:HHTAmbiguity} provides an example of where inflection points cause problems for the HHT. For this example, we use the signal 
+% \begin{eqnarray}\label{eq:HHTAmbiguityTestSig}
+% y\left( t \right) &=& \cos \left( \psi \left( t \right) \right) \\
+% \psi \left( t \right) &=& 2\pi ft + \cos \left( {2\pi ft} \right),
+% \end{eqnarray}
+% where $f=4$~Hz. The example illustrates how the sifting process can yield different results depending on where extrema occur. The inclusion of an extra maxima, by extending the data length by 100 ms (from Fig.~\ref{fig:HHTAmbiguity} B. to C.) changes the demodulation of the inflection points from phase distortions to full oscillations.
+% 
+% \begin{figure}
+%     \centering
+%     \includegraphics[scale=0.42]{./Figures/HHTAmbiguity}
+%     \caption[HHTAmbiguity]{\textbf{A.} Phase plane representation of the test signal from Eq.~\ref{eq:HHTAmbiguityTestSig}. The upper zero crossing on the $\mathcal{H}y(t)$ axis shows a cusp that is generated by the inflection points in the signal. \textbf{B.} $y(t)$ plotted with the cosine of the instantaneous phase estimate of the first IMF computed with the HHT, $\phi_h(t)$. \textbf{C.} The same test signal and plot the same quantities as B., but $t$ is extended by 0.1~s. The estimate of the instantaneous phase is inconsistent between plots B. and C.}
+%     \label{fig:HHTAmbiguity}
+% \end{figure}
 
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.42]{./Figures/HHTAmbiguity}
-    \caption[HHTAmbiguity]{\textbf{A.} Phase plane representation of the test signal from Eq.~\ref{eq:HHTAmbiguityTestSig}. The upper zero crossing on the $\mathcal{H}y(t)$ axis shows a cusp that is generated by the inflection points in the signal. \textbf{B.} $y(t)$ plotted with the cosine of the instantaneous phase estimate of the first IMF computed with the HHT, $\phi_h(t)$. \textbf{C.} The same test signal and plot the same quantities as B., but $t$ is extended by 0.1~s. The estimate of the instantaneous phase is inconsistent between plots B. and C.}
-    \label{fig:HHTAmbiguity}
-\end{figure}
-
-This paper extends the notion of instantaneous phase, frequency and amplitude for non-stationary signals through the introduction of the Circular Phase Transform (CPT). The CPT is conceptually related to the Hilbert-Huang Transform (HHT) in that it uses an adaptive demodulation technique to facilitate estimation of instantaneous signal properties. However, the CPT demodulates the signal in the phase-plane by finding local circle fits, allowing for more accurate phase and amplitude estimates. The paper is laid out as follows. Section~\ref{sect:CPTDescriptionSection} explains the concepts and theory underpinning the CPT. Section~\ref{sect:ComputingCPTSection} describes the procedure for computing the CPT. Section~\ref{sect:NoisySignalsSection} demonstrates how the CPT performs with noisy signals and illustrates how to select appropriate parameters for computing the transform. Section~\ref{sect:CPTEMDSection} shows how the CPT can be used to create an EMD that does not rely on the sifting process. %Section~\ref{sect:PhasePlaneCuspsSection} shows how inflections in a time series, or equivalently, phase-plane cusps pose major challenges for estimating IP. Section~\ref{EEGExampleSection} provides a practical example of the CPT EMD using an EEG signal. 
+This paper extends the notion of instantaneous phase, frequency and amplitude for non-stationary signals through the introduction of the Circular Phase Transform (CPT). The CPT is conceptually related to the Hilbert-Huang Transform (HHT) in that it uses an adaptive demodulation technique to facilitate estimation of instantaneous signal properties. However, the CPT demodulates the signal in the phase-plane by finding local circle fits, allowing for more accurate phase and amplitude estimates. The paper is laid out as follows. Section~\ref{sect:CPTDescriptionSection} explains the concepts and theory underpinning the CPT. Section~\ref{sect:ComputingCPTSection} describes the procedure for computing the CPT. Section~\ref{sect:NoisySignalsSection} demonstrates how the CPT performs with noisy signals and illustrates how to select appropriate parameters for computing the transform. %Section~\ref{sect:CPTEMDSection} shows how the CPT can be used to create an EMD that does not rely on the sifting process. %Section~\ref{sect:PhasePlaneCuspsSection} shows how inflections in a time series, or equivalently, phase-plane cusps pose major challenges for estimating IP. Section~\ref{EEGExampleSection} provides a practical example of the CPT EMD using an EEG signal. 
 The Discussion and Conclusion follow in Sections~\ref{sect:DiscussionSection} and~\ref{sect:ConclusionSection}, respectively. 
 
 \section{The Circular Phase Transform}\label{sect:CPTDescriptionSection}
 The Circular Phase Transform (CPT) is a new method for estimating the instantaneous phase and amplitude (IP and IA) from nonstationary signals. The CPT is an alternative to the HHT that provides improved estimates of instantaneous properties of signals by obtaining \dean{more local} IA and IP estimates. The CPT models a signal's local trajectory in the phase-plane as an arc of a circle. The circle center provides a new reference point for calculating the IP and IA, thereby acting as an adaptive demodulation.
 
-For smooth and continuous oscillatory signals, the local (infinitesimally small) phase-plane trajectory can be accurately described by the arc of a circle. For this class of signal, we can think of the IF as the reciprocal of the time taken to complete the circular orbit at its current rate of change and trajectory (following the arc) in the phase-plane. In other words, it is the best estimate of the instantaneous frequency, since a sinusoid is a circle in the phase-plane. Fourier analysis measures the correlation of the signal in the phase-plane to trajectories of unit circles with a harmonically-related set of frequencies. The CPT estimates circle parameters (radius and center), allowing them to vary at each time sample, thus establishing a basis that is adaptive. In this way, a general platform to establish the notion of IF is provided.
+For smooth and continuous oscillatory signals, the local (infinitesimally small) phase-plane trajectory can be accurately described by the arc of a circle \dean{(what about inflections or cusps?)}. For this class of signal, we can think of the IF as the reciprocal of the time taken to complete the circular orbit at its current rate of change and trajectory (following the arc) in the phase-plane. In other words, it is the best estimate of the instantaneous frequency, since a sinusoid is a circle in the phase-plane. Fourier analysis measures the correlation of the signal in the phase-plane to trajectories of unit circles with a harmonically-related set of frequencies. The CPT estimates circle parameters (radius and center), allowing them to vary at each time sample, thus establishing a basis that is adaptive. In this way, a general platform to establish the notion of IF is provided.
 
 With sufficient sampling and signal-to-noise ratio, the instantaneous properties described by an arc may be estimated from a discrete time series using circle fitting methods. The uniqueness of the phase-plane representation of a signal is guaranteed if the conditions of the Bedrosian theorem~\cite{Bedrosian1963} are met, and the uniqueness of the IA and IP estimates are inherent in circle fitting methods. In addition, the locally circular representation of the phase-plane trajectory enforces a quadrature structure on the analytic representation of the signal.
 
@@ -210,7 +213,7 @@ Naturally, it follows that for a small finite time interval, $\Delta t$, we have
 \begin{equation}\label{eq:IA_small_time_interval}
     r(t)-r(t-\Delta t) < \eta,
 \end{equation}
-where $\eta \in \mathbb{R}$ is a small constant. Equations~\ref{eq:IADef}, \ref{eq:IAlimitingCase}, and \ref{eq:IA_small_time_interval} simply state that given a sufficiently small segment of data the local oscillatory component $x(t)$ can be approximated by an arc of a circle in the phase-plane or, equivalently, a sinusoid in the time domain. In the noise-free case, the IP of $x(t)$ is
+where $\eta \in \mathbb{R}$ is a small constant. Equations~\ref{eq:IADef}, \ref{eq:IAlimitingCase}, and \ref{eq:IA_small_time_interval} simply state that given a sufficiently small segment of data the local oscillatory component, $x(t)$, can be approximated by an arc of a circle in the phase-plane or, equivalently, a sinusoid in the time domain. In the noise-free case, the IP of $x(t)$ is
 \begin{equation}\label{IPdef}
     \phi \left( t \right) = \arctan \left( \frac{\mathcal{H}x\left( t \right)}
     {x\left( t \right)} \right).
@@ -223,7 +226,7 @@ where $\eta \in \mathbb{R}$ is a small constant. Equations~\ref{eq:IADef}, \ref{
 % \end{equation}
 % This test signal was chosen since it was used as an example in~\cite{Huang2008} for demonstrating problems of having non-quadrature Hilbert transforms, which results in an underestimate of the IF when using the HHT. The DQ method and the CPT both provide very good IF estimates. The HHT IF estimates are inaccurate due to having a non-quadrature analytic signal for the IMF. The DQ method overcomes the limitations described in the Nuttall theorem via normalizing the IMFs prior to computing the analytic signal. The CPT overcomes the limitations of the Nuttall theorem by enforcing a circular structure in the phase-plane. The DQ method has some minor problems in estimating the IF at points corresponding to extrema of the time-series. This is a consequence of the normalization procedure. 
 % ~~~~~~~~~~~~~~~
-An advantage of the CPT over the HHT comes from modelling the signal trajectory allowing for the inclusion of a disturbance term. In addition, the sifting process distorts the IA estimates (as seen in Fig.~\ref{fig:HHTDemo}). Since the CPT does not rely on sifting, meaningful IA estimates are obtained.
+Modelling the signal trajectory as an arc of a circle in the phase plane enables the inclusion of a disturbance term, allowing for noise to be dealt with in a consistent manner. By performing the adaptive demodulation without sifting In addition, the sifting process distorts the IA estimates (as seen in Fig.~\ref{fig:HHTDemo}). Since the CPT does not rely on sifting, meaningful IA estimates are obtained.
 % advantage of the CPT method over the HHT is that it does not rely on the sifting process, allowing for inflections to be handled in a more consistent manner. Another 
 
 % this bit is commented out because we are not comparing the CPT to the DQ method
@@ -243,7 +246,7 @@ The Circular Phase Transform is principally a circle fitting procedure. The step
 % The algorithm fits circles to segments of data (using a sliding window) allowing for different  arc lengths at each sample, by fitting circles to a range of candidate segment lengths and selecting the best one. The concavity of the arc is checked for by ensuring that the fitted circle center is on the correct side or the arc; this is done by estimating the tangent, and thereby the normal, vector. In addition, the IP corresponding to the the candidate circles is checked, making sure the IP is monotonically increasing in time. The best circle fit (according to our criteria) is selected from the valid candidates (with varying arc lengths) and the corresponding parameters are used to describe the instantaneous properties of the signal. Finally, missing data points that did not satisfy the criteria inserted by interpolation.
 
 \subsection{Circle Fitting Procedure}\label{sect:CircleFittingProcedure}
-From this point on, the signal $y(t)$ will be referred to as a discrete time series $y(n)$, where $n$ indexes the samples and $T_s$ is the sampling period. The data segments used to find the candidate circle fits for sample $n$ are described by the set of points
+From this point on, the signal, $y(t)$, will be referred to as a discrete time series $y(n)$, where $n$ indexes the samples and $T_s$ is the sampling period. The data segments used to find the candidate circle fits for sample $n$ are described by the set of points
 \begin{equation}\label{eq:DataSegment}
 \{\left(y\left(q\right),\mathcal{H}y\left(q\right)\right)  \,\forall q \ | \, q \in [n-m,n+m]\},
 \end{equation}
@@ -261,9 +264,9 @@ By estimating a circle that best fits the data segment in a least squares sense,
 \end{figure}
 
 \subsection{Detecting Invalid Parameters}\label{sect:DetectingInvalidParameters}
-To accurately approximate the the phase-plane trajectory of a nonstationary signal by an arc of a circle, it is desirable to use small segments of data. However, when using fewer points and smaller arc lengths, noise has a larger effect on the result. Therefore, a series of checks is used to prevent errors. 
+To accurately approximate the phase-plane trajectory of a nonstationary signal by an arc of a circle it is desirable to use small segments of data. However, when using fewer points and smaller arc lengths, noise has a larger effect on the result. Therefore, a series of checks is used to prevent errors. 
 \subsubsection{Incorrect Circle Center Identification}
-Any bounded oscillatory signal will have a closed trajectory in the phase-plane. Therefore, the fitted circle centers (signal offsets) should be confined to one side of the arc. However, errors can occur when fitting circles to noisy data with small arc lengths, where noise may make a concave arc appear to be convex (or vice-versa), resulting in the circle center being mapped to the incorrect side of the arc. A check to prevent circle centers being mapped to the incorrect side is to use the local tangent of the signal as a separating line. If candidate circle centers are on the incorrect side of the tangent, they are rejected. The signal in the phase-plane in vector form is described as
+Any bounded oscillatory signal will have a closed trajectory in the phase-plane. Therefore, the fitted circle centers (signal offsets) should be confined to one side of the arc. However, errors can occur when fitting circles to noisy data with small arc lengths, where noise may make a concave arc appear to be convex (or vice-versa), resulting in the circle center being mapped to the incorrect side of the arc. A check to prevent circle centers being mapped to the incorrect side is to use the local tangent of the signal as a separating line. If candidate circle centers are on the incorrect side of the tangent, they are rejected. This can be detected by computing the inner product of the normal vector to the tangent and the circle center estimate. To show this the signal in the phase-plane in vector form is described as
 \begin{equation}
 	\mathbf{p}_y(n) = \left[y\left(n\right),\mathcal{H}y\left(n\right)\right]^{\top}.
 \end{equation}
@@ -290,6 +293,7 @@ where an incorrect estimate is detected with the condition
 \begin{equation}\label{eq:IncorrectSideClassifier}
     \zeta(n,\kappa) < 0.
 \end{equation} 
+
 If no candidate circle center satisfies this condition at a particular point, then the IP and IA cannot be estimated for that sample using this method. These values must be interpolated at the completion of the estimation procedure. 
 
 \subsubsection{Incorrect Phase Change}
@@ -341,7 +345,7 @@ where $\omega_1$ is the highest spectral component of the IA. In practice, this 
 which states the change in the IA estimate must be less than the change in the IP estimate. Since this condition is only loosely based on the Bedrosian theorem, it is used as guide and not a hard rule. If this condition is satisfied for any candidate circle fits then only those fits will be used. However, if the condition is not satisfied for any candidate circle fits then the condition is not used.
 
 \subsection{Parameter Selection}\label{sect:BestParameters}
-To account for nonstationarities in the amplitude and frequency content of the signal and to account for various noise levels, it is important to find candidate parameters using different segment sizes or arc lengths. To select the best segment size, we exploit the fact that in the noise-free case the CPT should preserve the relative distance and angle in the phase-plane between consecutive data points of the original signal in the mapped signal. In other words, the mapping can be considered a translation of the origin (to the offset $\mathbf{p}_{x_0}\left(n\right)$) or fitted circle center, maintaining the local structure of the data. The preservation of the data structure is measured using the distance mismatch (DM) between samples in $\mathbf{p}_y(n)$ and $\mathbf{p}_x(n,\kappa)$. 
+To account for nonstationarities in the amplitude and frequency content of the signal and to account for various noise levels, it is important to find candidate parameters using different segment sizes or arc lengths. To select an appropriate segment size, we exploit the fact that in the noise-free case the CPT should preserve the relative distance and angle in the phase-plane between consecutive data points of the original signal in the mapped signal. In other words, the mapping can be considered a translation of the origin (to the offset $\mathbf{p}_{x_0}\left(n\right)$) or fitted circle center, maintaining the local structure of the data. The preservation of the data structure is measured using the distance mismatch (DM) between samples in $\mathbf{p}_y(n)$ and $\mathbf{p}_x(n,\kappa)$. 
 
 To derive the DM, we first define the vectors
 \begin{align}
@@ -357,7 +361,7 @@ If the mapping is a translation of the origin that preserves the original data s
 	\kappa^* = \arg \mathop{\min} \limits_\kappa d\left( n,\kappa \right).
 \end{equation}
 
-By calculating the DM using points at the edge of the segment, the effect of noise is reduced. This is because the acuity of the angle.. In addition, by using the point at the edge of the segment, the maximum arc size is controlled. If the arc length is too large for nonstationary signals then the trajectory of $\mathbf{p}_y(n)$ will not be an arc of a circle so the mapping will not be a translation of the origin. If the circle parameters at the trailing end of the segment do not satisfy the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1}, and~\ref{eq:Prior2} then $\mathbf{p}_x(n-m,\kappa^*)$ is not defined. In this case, the next sample in the arc must be used ($n-m+1$) to find $\mathbf{v}_1(n,\kappa)$. If the conditions are not satisfied for the sample $n-m+1$, then $n-m+2$ is used and so on. If no samples in the arc satisfy the conditions then an alternative cost function is used. 
+The DM is calculated using the point at the edge of the segment because the effect of noise is less severe further from the center of the arc. In addition, by using the point at the edge of the segment, the maximum arc size is controlled. If the arc length is too large for nonstationary signals then the trajectory of $\mathbf{p}_y(n)$ will not be an arc of a circle so the mapping will not be a translation of the origin. If the circle parameters at the trailing end of the segment do not satisfy the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1}, and~\ref{eq:Prior2} then $\mathbf{p}_x(n-m,\kappa^*)$ is not defined. In this case, the next sample in the arc must be used ($n-m+1$) to find $\mathbf{v}_1(n,\kappa)$. If the conditions are not satisfied for the sample $n-m+1$, then $n-m+2$ is used and so on. If no samples in the arc satisfy the conditions then an alternative cost function is used. 
 
 The alternative cost function selects a candidate arc that satisfies Eqs.~\ref{eq:IncorrectSideClassifier}, \ref{eq:Prior1}, and~\ref{eq:Prior2} and minimizes
 \begin{align}\label{BestCircFit2Reinitialize}
@@ -370,11 +374,19 @@ where $\langle\rangle_q$ denotes the mean over the segment of the data used to f
 \end{equation}
 This alternative cost function finds the best circle by minimizing the distance between the signal and fitted points. For small arc lengths, this cost function is not as restrictive as Eq.~\ref{eq:relative_distance_mismatch} so the parameter estimates are not as reliable. Therefore, once re-initialized, the DM is used to specify the candidate circle. %\dean{For discussion:Other criteria for finding circle parameters are sure to exist and this is a topic for further research.}
 
-Parameters corresponding to samples where no candidate circle fit satisfied the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1}, and~\ref{eq:Prior2} are interpolated after the time series has been processed. Since the unwrapped phase is monotonically increasing, we can use a linear interpolation to find missing values. Interpolating the missing IA estimates is a little more challenging, since it is not monotonic. However, the IA is fluctuating on a slower time scale than the IP so it can be interpolated using a shape preserving cubic spline. Alternatively, given an accurate IP estimate, we can find an empirical estimate of the IA. This is explained in Section~\ref{sect:CPTEMDSection}. 
+Parameters corresponding to samples where no candidate circle fit satisfied the conditions from Eqs.~\ref{eq:IncorrectSideClassifier},~\ref{eq:Prior1}, and~\ref{eq:Prior2} are interpolated after the time series has been processed. Since the unwrapped phase is monotonically increasing, linear interpolation can be used to find missing values. Interpolating the missing IA estimates is more challenging, since it is not monotonic. However, the IA is fluctuating on a slower time scale than the IP so it can be interpolated using a shape preserving cubic spline. \dean(Alternatively, given an accurate IP estimate, we can find an empirical estimate of the IA. This is explained in Section~\ref{sect:CPTEMDSection}). 
 
-The CPT algorithm has two free parameters specifying the minimum, $m_{min}$, and maximum, $m_{max}$, number of points used to find candidate circle fits. The minimum segment size should be set according to the sampling rate (where a higher sampling rate requires a larger $m_{min}$), the frequency content of the signal (higher frequencies requires a smaller $m_{min}$), and the level of noise (more noise requires a larger $m_{min}$). Importantly, $m_{min}$ also specifies the points used to estimate the tangent vector, so a larger $m_{min}$ is required to find an appropriate circle fit and the ensure the approximated tangent is in the direction of the true tangent in the presence of noise. This point is further elaborated in Section~\ref{sect:NoisySignalsSection}. 
+The CPT algorithm has two free parameters specifying the minimum, $m_{min}$, and maximum, $m_{max}$, number of points used to find candidate circle fits. Importantly, $m_{min}$ also specifies the points used to estimate the tangent vector, so a larger $m_{min}$ is required to find an appropriate circle fit and the ensure the approximated tangent is in the direction of the true tangent in the presence of noise. The minimum segment size should be set according to the sampling rate (where a higher sampling rate requires a larger $m_{min}$), the frequency content of the signal (higher frequencies requires a smaller $m_{min}$), and the level of noise (more noise requires a larger $m_{min}$).  This point is further elaborated in Section~\ref{sect:NoisySignalsSection}. 
 
-As a general rule, $m_{min}$ should be set to less than half the number of samples in the period of $f_{max}$. For noisy signals, $m_{min}$ should be set closer to half the number of samples in the period of $f_{max}$. This provides the optimal number of points for estimating the tangent vector. For low noise signals, $m_{min}$ should be decreased so that modulations and nonstationarities can be modeled more accurately. 
+As a general rule for noisy signals, $m_{min}$ should be set to half the number of samples in the period the mid range frequency where
+\begin{equation}\label{eq:MinNumberOfPoints}
+	m_{min} = \frac{2F_s}{\left(f_{min}+0.5(f_{max}-f_{min})\right)},
+\end{equation}
+if 
+\begin{equation}
+	m_{min} < F_s/f_{max}
+\end{equation}
+This provides a good number of points for estimating the tangent vector. For low noise signals, $m_{min}$ should be decreased so that modulations and nonstationarities can be modeled more accurately. 
 
 As mentioned above, a property of the DM is that it prevents over-fitting. For nonstationary signals, if the candidate segment sizes used to fit the circles are too large the mapping is no longer a simple translation of the origin and candidates with smaller arc lengths will be selected. Therefore, $m_{max}$ is limited by computation demands.
 
@@ -407,48 +419,59 @@ As mentioned above, a property of the DM is that it prevents over-fitting. For n
 \end{algorithm}
 
 \section{Examples}
-\subsection{Comparison to HT, HHT and NHT}
-\dean{Note: I need to make the test signal such that the normalisation will work over the time of analysis. Also, I need to comment on why it is such a pain in the butt.}
+\subsection{Comparison to HT, HHT, NHT and DQ Methods}
+In this section a comparison is made between the instantaneous phase estimates of the CPT to the Hilbert transform, Hilbert-Huang transform, normalized Hilbert transform and the direct quadrature methods. The test signals are chirps with a time varying amplitude described as
+\begin{equation}\label{TestSigNoNoise}
+    y(n)=r\left(n\right)cos\left(\phi\left(n\right)\right)
+\end{equation}
+where the frequency increases linearly from $f_{min}$ = 10 Hz at $n=1$ to $f_{max}$ = 100 Hz at $n=N$. The sampling rate was 10~kHz and the data length used was 300 ms such that $N = 3000$. The first test signal is shown in Figure~\ref{fig:TestSig1}, where $r(0) = 4$ and linearly decreases to $r(N) = 1$. This test signal was chosen because it has a known IP so a direct comparison can be made. To form the comparison, the test signals were split into 3 groups. In addition, to alleviate problems associated with boundary effects the first 0.02~ms of the signal was discarded so the results were not confounded. Following this, the effective frequency range of the chirp was approximately 16 to 94~Hz. The IMF of the EMD used to form the comparison was selected by choosing the IMF with the smallest error. In addition, the possibility of $2\pi$ phase wrapping was accounted for when finding the error.
+
 \begin{figure}[htbp]
 	\centering
 		\includegraphics[scale=1]{./Figures/TestSigForCompFig.eps}
-	\caption{Test signal for comparisons. The vertical lines mark the boundaries for different time groups within the signal where comparisons were made. }
-	\label{fig:label}
+	\caption{Test signal 1 for comparisons. The vertical lines mark the boundaries for different time groups within the signal where comparisons were made. The dashed line shows the parts of the signal that were discarded so edge effects did not confound results.}
+	\label{fig:TestSig1}
 \end{figure}
 
-\begin{figure}[htbp]
+The minimum number of points was set according Eq.~\ref{eq:MinNumberOfPoints} and the maximum number of points was set to the same value. The results of the comparison are shown in Figure~\ref{fig:ResultsTestSig1}. The figure demonstrates that the net performance of the CPT in estimating the IP is superior to the other methods for the test signal.
+
+\begin{figure}[!h]
 	\centering
 		\includegraphics[scale=1]{./Figures/IPRMSECompFig.eps}
-	\caption{Comparison of the CPT to the HT, NHT and HHT. \textbf{A} show the RMSE of the the phase estimates over the duration entire test signal. \textbf{B} Shows the results for the first time period. \textbf{C} Shows the results for the middle time period. \textbf{D} Shows the results for the last time period.}
-	\label{fig:label}
+	\caption{Comparison of the CPT to the HT, HHT, NHT and DQ methods with test signal 1. \textbf{A} show the RMSE of the the phase estimates over the duration entire test signal (excluding regions discarded for edge effects). \textbf{B} Shows the results for the first time period. \textbf{C} Shows the results for the middle time period. \textbf{D} Shows the results for the last time period.}
+	\label{fig:ResultsTestSig1}
 \end{figure}
 
-\begin{figure}[htbp]
+The second test signal consisted of the same as as test signal 1, however the IA was different where the IA changed in a piece-wise linear fashion such that $r(0)=4$, $r(1500)=1$ and $r(N) = 4$. An example of the test signal can be seen in Figure~\ref{fig:TestSig2}. In the same manner as for test signal 1, the signal was split into 3 time groups to form the comparison.
+
+\begin{figure}[!ht]
 	\centering
 		\includegraphics[scale=1]{./Figures/TestSigForCompFig2.eps}
-	\caption{Test signal for comparisons. The vertical lines mark the boundaries for different time groups within the signal where comparisons were made. }
-	\label{fig:label}
+	\caption{Test signal 2 for comparisons. The vertical lines mark the boundaries for different time groups within the signal where comparisons were made. }
+	\label{fig:TestSig2}
 \end{figure}
 
-\begin{figure}[htbp]
+The results for the test signal 2 can be seen in Figure~\ref{fig:ResultsTestSig2}. The results indicate that the CPT perform slightly worse than for signal 1. This is due to the faster change in the IA, and a bias in the estimation to higher frequencies when the IP is nonstationary. Lower frequency segments of signals have smaller arc lengths and higher frequency components have larger arc lengths for a given sampling rate. Therefore, when fitting a circle to a segment of data with a changing frequency and amplitude, there will be a bias towards the higher frequency part of the segment. For a slow changing IA this small and for a faster changing IA the bias becomes larger. Nevertheless, this example shows the error differs by approximately 0.5\% between all methods.
+\begin{figure}[!ht]
 	\centering
 		\includegraphics[scale=1]{./Figures/IPRMSECompFig2.eps}
-	\caption{Comparison of the CPT to the HT, NHT and HHT. \textbf{A} show the RMSE of the the phase estimates over the duration entire test signal. \textbf{B} Shows the results for the first time period. \textbf{C} Shows the results for the middle time period. \textbf{D} Shows the results for the last time period.}
-	\label{fig:label}
+	\caption{Comparison of the CPT to the HT, HHT, NHT and DQ methods with test signal 2. \textbf{A} show the RMSE of the the phase estimates over the duration entire test signal. \textbf{B} Shows the results for the first time period. \textbf{C} Shows the results for the middle time period. \textbf{D} Shows the results for the last time period.}
+	\label{fig:ResultsTestSig2}
 \end{figure}
 
-\begin{figure}[htbp]
+The third test signal can be seen in Figure~\ref{fig:TestSig3}. The results are shown in Figure~\ref{fig:ResultsTestSig3}. Best the results for the DQ are weird and I can not work out what is going on I will not consider this test signal any further.
+\begin{figure}[!ht]
 	\centering
 		\includegraphics[scale=1]{./Figures/TestSigForCompFig3.eps}
-	\caption{Test signal for comparisons. The vertical lines mark the boundaries for different time groups within the signal where comparisons were made. }
-	\label{fig:label}
+	\caption{Test signal 3 for comparisons. The vertical lines mark the boundaries for different time groups within the signal where comparisons were made. }
+	\label{fig:TestSig3}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure}[!ht]
 	\centering
 		\includegraphics[scale=1]{./Figures/IPRMSECompFig3.eps}
-	\caption{Comparison of the CPT to the HT, NHT and HHT. \textbf{A} show the RMSE of the the phase estimates over the duration entire test signal. \textbf{B} Shows the results for the first time period. \textbf{C} Shows the results for the middle time period. \textbf{D} Shows the results for the last time period.}
-	\label{fig:label}
+	\caption{Comparison of the CPT to the HT, HHT, NHT and DQ methods for signal 3. \textbf{A} show the RMSE of the the phase estimates over the duration entire test signal. \textbf{B} Shows the results for the first time period. \textbf{C} Shows the results for the middle time period. \textbf{D} Shows the results for the last time period.}
+	\label{fig:ResultsTestSig3}
 \end{figure}
 
 \subsection{CPT of Noisy Signals}\label{sect:NoisySignalsSection}
@@ -463,6 +486,12 @@ Since the IA of $y(n)$ is non-stationary, the SNR is also non-stationary. Theref
 \begin{figure*}[htbp]\label{RMSEComparison}
     \centering
         \includegraphics[scale=1]{./Figures/SNRcomparisonFigure.eps}
+    \caption{Comparison of the CPT IP estimates to the normalized Hilbert transform for noisy signals. Note; the whiskers show std dev. The red line shows the median, the box cover the data range, except for the outliers shown by red crosses.}
+\end{figure*}
+
+\begin{figure*}[htbp]\label{RMSEComparisonSig2}
+    \centering
+        \includegraphics[scale=1]{./Figures/SNRcomparisonFigureSig2.eps}
     \caption{Comparison of the CPT IP estimates to the normalized Hilbert transform for noisy signals. Note; the whiskers show std dev. The red line shows the median, the box cover the data range, except for the outliers shown by red crosses.}
 \end{figure*}
 
