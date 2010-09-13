@@ -248,7 +248,7 @@ The Circular Phase Transform is principally a circle fitting procedure. The step
 \subsection{Circle Fitting Procedure}\label{sect:CircleFittingProcedure}
 From this point on, the signal, $y(t)$, will be referred to as a discrete time series $y(n)$, where $n$ indexes the samples and $T_s$ is the sampling period. The data segments used to find the candidate circle fits for sample $n$ are described by the set of points
 \begin{equation}\label{eq:DataSegment}
-\{\left(y\left(q\right),\mathcal{H}y\left(q\right)\right)  \,\forall q \ | \, q \in [n-m,n+m]\},
+\{\left(y\left(q\right),\mathcal{H}y\left(q\right)\right)  \,\forall q \ | \, q \in [n-m_b,n+m_f]\},
 \end{equation}
 where $m\in\mathbb{N}^+$ and $m=m_{min},..,m_{max}$ sets the segment lengths, which are $2m+1$ samples. The minimum size of a segment to fit a circle from data that is not a perfect circle is 4, therefore $m_{min}>1$. The segments are described as being symmetric about the sample of interest, $n$, for clarity of explanation. This is not a requirement for the transform where, for example, an asymmetric or randomly drawn set of samples about the sample of interest may be used to find the candidate circles. By using a range of candidate circle fits, nonstationarity can be accounted for. For example, if a section of a time series has a slowly varying IP and IA, then a larger arc, or more samples, should be used to fit a circle (if there is noise present) than if the IP and IA were varying faster.
 
@@ -384,9 +384,9 @@ As a general rule for noisy signals, $m_{min}$ should be set to half the number 
 \end{equation}
 if 
 \begin{equation}
-	m_{min} < F_s/f_{max}
+	m_{min} < F_s/f_{max}.
 \end{equation}
-This provides a good number of points for estimating the tangent vector. For low noise signals, $m_{min}$ should be decreased so that modulations and nonstationarities can be modeled more accurately. 
+This provides a good number of points for estimating the tangent vector. For low noise signals, $m_{min}$ should be decreased so that modulations and nonstationarities can be modeled more accurately. For low noise signals, the optimal choice for the smallest segment size is $m_{min}=\frac{0.5F_s}{f_{max}}$, which provides a tangent estimate using half the number of samples (semi-circle in the phase-plane) in the highest frequency period. As noise is introduced, more samples are required to estimate the tangent for the low frequency component to ensure the direction of the tangent follows the trajectory of the signal.
 
 As mentioned above, a property of the DM is that it prevents over-fitting. For nonstationary signals, if the candidate segment sizes used to fit the circles are too large the mapping is no longer a simple translation of the origin and candidates with smaller arc lengths will be selected. Therefore, $m_{max}$ is limited by computation demands.
 
@@ -451,7 +451,7 @@ The second test signal consisted of the same as as test signal 1, however the IA
 	\label{fig:TestSig2}
 \end{figure}
 
-The results for the test signal 2 can be seen in Figure~\ref{fig:ResultsTestSig2}. The results indicate that the CPT perform slightly worse than for signal 1. This is due to the faster change in the IA, and a bias in the estimation to higher frequencies when the IP is nonstationary. Lower frequency segments of signals have smaller arc lengths and higher frequency components have larger arc lengths for a given sampling rate. Therefore, when fitting a circle to a segment of data with a changing frequency and amplitude, there will be a bias towards the higher frequency part of the segment. For a slow changing IA this small and for a faster changing IA the bias becomes larger. Nevertheless, this example shows the error differs by approximately 0.5\% between all methods.
+The results for the test signal 2 can be seen in Figure~\ref{fig:ResultsTestSig2}. The results indicate that the CPT does not perform as well as it did for signal 1. This is due to the faster change in the IA, and a bias in the estimation to higher frequencies when the IA and IP is nonstationary. The bias can be understood by considering that lower frequency segments of signals have smaller arc lengths and higher frequency components have larger arc lengths for a given sampling rate. Therefore, when fitting a circle to a segment of data with a changing frequency and amplitude, there will be a bias towards the larger arc length or higher frequency part of the segment. For a slow changing IA this small and for a faster changing IA the bias becomes larger. Nevertheless, this example shows the net error differs by approximately 0.5\% between all methods for this test signal.
 \begin{figure}[!ht]
 	\centering
 		\includegraphics[scale=1]{./Figures/IPRMSECompFig2.eps}
@@ -475,27 +475,39 @@ The third test signal can be seen in Figure~\ref{fig:TestSig3}. The results are 
 \end{figure}
 
 \subsection{CPT of Noisy Signals}\label{sect:NoisySignalsSection}
-This section demonstrates how the CPT performs when noise is present and compares the performance to the normalized Hilbert transform (NHT). For the demonstration we used a chirp with decreasing IA and additive Gaussian noise described by
+This section demonstrates how the CPT performs when noise is present and compares the performance to the ensemble empirical mode decomposition (EEMD). For the demonstration the test signals 1 and 2 from the previous section were used, but with additive Gaussian noise described by
 \begin{equation}
     y(t)=r\left(t\right)cos\left(\phi\left(n\right)\right) + \varepsilon \left( n \right).
 \end{equation}
-The frequency increases in a linear way from $f_{min}$ = 10 Hz at $n=1$ to $f_{max}$ = 100 Hz at $n=N$, the amplitude decreases in a linear way, where $r(1) = 3$, $r(N) = 0.5$, and $\varepsilon(n) \sim \mathcal{N}(0,\sigma^2)$. The sampling rate was 10~kHz and the data length used was 300 ms such that $N = 3000$. The standard deviation of the noise was varied from $0$ to $0.56$ in steps of $0.07$ (9 levels). The minimum number of points used to fit the arc was set to $Q_{min}=\frac{0.9F_s}{f_{max}}$. This choice reflects a trade-off for selecting the number of samples to get a satisfactory tangent estimate for the low and high frequency components of the chirp. In addition, further consideration \todo{DG: not sure what you mean here.} was given to allowing a sufficient number of points to estimate circle parameters for the high frequency low SNR components. For low noise signals, the optimal choice for the smallest segment size is $Q_{min}=\frac{0.5F_s}{f_{max}}$, which provides a tangent estimate using half the number of samples (semi-circle in the phase-plane) in the highest frequency period. As noise is introduced, more samples are required to estimate the tangent for the low frequency component to ensure the direction of the tangent follows the trajectory of the signal. The maximum number of points was set to $Q_{max} = 5Q_{min}$. This setting was a trade-off between computation complexity and a sufficient number of points to model the low frequency component of the chirp. The segment size was increased in steps of 2 between $Q_{min}$ and $Q_{max}$.
+where $\varepsilon(n) \sim \mathcal{N}(0,\sigma^2)$. The standard deviation of the noise was varied from $0$ to $0.56$ in steps of $0.07$ (9 levels). The minimum number of points used to fit the arc was set in accordance with Eq.~\ref{eq:MinNumberOfPoints}. This choice reflects a trade-off for selecting the number of samples to get a satisfactory tangent estimate for the low and high frequency components of the chirp. The maximum number of points was set to $m_{max} = 5m_{min}$. This setting was a trade-off between computation complexity and a sufficient number of points to model the low frequency component of the chirp. The segment size was increased in steps of 5 between $m_{min}$ and $m_{max}$.
 
-Since the IA of $y(n)$ is non-stationary, the SNR is also non-stationary. Therefore, the phase estimates were separated into $3$ groups, each corresponding to $100$~ms of the time series, to better approximate the SNR for benchmarking and comparison. The root mean squared error (RMSE) of the IP estimates were calculated for 100 realizations of the test signal using the NHT and the CPT. The calculation of the RMSE allowed for wrapping between $0$ and $2\pi$ of the IP estimates, such that the maximum possible error is less than $\pi$. All IMFs were calculated using the NHT, since we do not know the mode corresponding to the signal \emph{a priori}. The IMF of NHT with lowest RMSE for the middle group ($100-200$~ms) was used for the comparison, so edge effects did not influence the choice of the best IMF corresponding to the signal. 
+Since the IA of $y(n)$ is non-stationary, the SNR is also non-stationary. Therefore, the phase estimates were separated into $3$ groups to approximate the SNR for benchmarking and comparison. The root mean squared error (RMSE) of the IP estimates were calculated for 200 realizations of the test signal using the EEMD NHT and the CPT. The calculation of the RMSE allowed for wrapping between $0$ and $2\pi$ of the IP estimates, such that the maximum possible error is $\pi$. All IMFs were calculated using the NHT, since we do not know the mode corresponding to the signal \emph{a priori}. The IMF of EEMD with lowest RMSE for the middle time group was used for the comparison to be sure the edge effects did not influence the choice of the best IMF corresponding to the signal. 
 
-\begin{figure*}[htbp]\label{RMSEComparison}
+The results for the first test signal are shown in Figure~\ref{fig:RMSEComparison}. The figure indicates the the CPT yielded better IP estimates for group 1 and a comparable performance between the two methods for the groups 2 and 3. These results illustrate both methods are capable of distinguishing the signal in the presence of noise.
+\begin{figure*}[!ht]\label{fig:RMSEComparison}
     \centering
         \includegraphics[scale=1]{./Figures/SNRcomparisonFigure.eps}
-    \caption{Comparison of the CPT IP estimates to the normalized Hilbert transform for noisy signals. Note; the whiskers show std dev. The red line shows the median, the box cover the data range, except for the outliers shown by red crosses.}
+    \caption{Comparison of the CPT IP estimates to the normalized Hilbert transform incorporating the ensemble empirical mode decomposition for test signal 1 with additive noise. Note; the whiskers show std dev. The red line shows the median, the box cover the data range, except for the outliers shown by red crosses.}
 \end{figure*}
 
-\begin{figure*}[htbp]\label{RMSEComparisonSig2}
+The results for the second test signal are shown in Figure~\ref{fig:RMSEComparisonSig2}. 
+\begin{figure*}[!ht]\label{fig:RMSEComparisonSig2}
     \centering
         \includegraphics[scale=1]{./Figures/SNRcomparisonFigureSig2.eps}
     \caption{Comparison of the CPT IP estimates to the normalized Hilbert transform for noisy signals. Note; the whiskers show std dev. The red line shows the median, the box cover the data range, except for the outliers shown by red crosses.}
 \end{figure*}
 
-The results in Fig.~\ref{RMSEComparison} shows that with no noise (SNR = $\inf$) the CPT and the NHT both provide repeatable results \todo{DG: not sure what you mean by `repeatable' here}. The systematic errors \todo{DG: this seems unfair to let edge effects influence the results} for the first and last time groups for NHT  result from edge effects of the sifting and normalization processes. When a small amount of noise is introduced, the NHT becomes unreliable. This is due to intra-mode mixing (ref), where noise and signal components are mixed into the same modes of the decomposition. For some realizations of the test signal, the NHT outperforms the CPT in the IP estimates. If intra-mode mixing was not a problem, the NHT would perform better for this test signal. However, separation of the noise and the signal using the NHT IMFs is not reliable nor repeatable. Fig.~\ref{CPTandNHTTogether} shows an example of $y(n)$ with the IP estimates of the NHT and the CPT. 
+\begin{figure*}[!ht]\label{fig:RMSEComparisonSig2_IA}
+    \centering
+        \includegraphics[scale=1]{./Figures/IA_RMSE_Sig2.eps}
+    \caption{Comparison of the CPT IA estimates to the normalized Hilbert transform for noisy signals.}
+\end{figure*}
+
+\begin{figure}[!ht]\label{fig:label}
+    \centering
+        \includegraphics[scale=1]{./Figures/IMFNoFigSig2.eps}
+    \caption{IMF index corresponding to the signal.}
+\end{figure}
 
 \begin{figure}\label{CPTandNHTTogether}
     \centering
@@ -503,37 +515,36 @@ The results in Fig.~\ref{RMSEComparison} shows that with no noise (SNR = $\inf$)
     \caption{Demonstration the IP estimate of the CPT and NHT. Note: edge effect only last for the first 10~ms. The rest of the errors in the NHT are due to mode mixing. }
 \end{figure}
 
-Focusing on the results from the CPT for the first time group, the variance of the IP estimate begins to increase at a SNR of approximately $14$~dB. These errors occur because the minimum arc length is too short given the noise level. When the minimum arc length is too short, the principal axis of the segment is in the direction of the additive noise rather than following the trajectory of the signal. This can be overcome by using a larger arc length and estimating the tangent vector using more samples. However, increasing the minimum segment size would impact negatively on the higher frequency part of the chirp. For the second time group, as noise is increased, errors increase in a systematic way with an approximate inverse linear relationship to the SNR. For this group, the minimum segment size is sufficient to estimate a satisfactory tangent. Errors in the third group, starting from approximate $7$~dB, are because the SNR is too high for the algorithm to work, regardless of the segment size. Together, these results demonstrate that for relatively simple signals the CPT can estimate IP in the presence of mild disturbances. \todo{DG: we need to consider increasing this discussion of the figure.}
+% Focusing on the results from the CPT for the first time group, the variance of the IP estimate begins to increase at a SNR of approximately $14$~dB. These errors occur because the minimum arc length is too short given the noise level. When the minimum arc length is too short, the principal axis of the segment is in the direction of the additive noise rather than following the trajectory of the signal. This can be overcome by using a larger arc length and estimating the tangent vector using more samples. However, increasing the minimum segment size would impact negatively on the higher frequency part of the chirp. For the second time group, as noise is increased, errors increase in a systematic way with an approximate inverse linear relationship to the SNR. For this group, the minimum segment size is sufficient to estimate a satisfactory tangent. Errors in the third group, starting from approximate $7$~dB, are because the SNR is too high for the algorithm to work, regardless of the segment size. Together, these results demonstrate that for relatively simple signals the CPT can estimate IP in the presence of mild disturbances. \todo{DG: we need to consider increasing this discussion of the figure.}
+\section{The CPT for Empirical Mode Decomposition}\label{sect:CPTEMDSection}
+For low noise signals, the CPT can be used as an alternative to the sifting process of the HHT to create an empirical mode decomposition (EMD). The CPT EMD models the signal as
+\begin{eqnarray}
+    y(n) &=& x_{0,K}(n) + \sum_{k=1}^{K}x_k(n) + \varepsilon(n) \\
+    x_k\left(n\right) &=& r_k\left(n\right)cos\left(\phi_k\left(n\right)\right),
+\end{eqnarray}
+where the subscript $k$ indexes the $K$ intrinsic mode functions (IMFs), $x_k(n)$, of the EMD. The IP, $\phi_k(n)$, for each IMF is estimated using the CPT. The IMFs are ordered such that the highest frequency component corresponds to $k=1$. For the first IMF $x_1(n)$, we can consider $x_{0,1}(n)$ as a modulation term. If $x_{0,1}(n)$ also has modulations then it can be decomposed into an oscillatory term $x_2(n)$ and an offset (another modulating term) $x_{0,2}(n)$. The process can be repeated until all $K$ oscillatory modes are extracted from $y(n)$, leaving the final offset term $x_{0,K}(n)$.
+ As we have demonstrated, the IP can be estimated using the CPT without the requirement of sifting. However, for complicated signals, the estimates of IA and offset are not accurate enough to be used in the decomposition. Therefore, an empirical method is used for approximating the IA, $r_k(n)$, and offset, $x_{0,k}(n)$ to perform the CPT EMD. The empirical method used for estimating the IA in the CPT EMD is similar to the method used in the normalized Hilbert transform for separating the IA from the IP components~\cite{Huang2005}. The empirical offset, $x_{0,k}(n)$ is approximated by
+\begin{equation}
+    x_{0,k}(n) = \frac{s_{max,k}(n) + s_{min,k}(n)}{2},
+\end{equation}
+where $s_{max,k}(n)$ is a cubic spline interpolation through points from $y(n)$ (if $k=1$) or $x_{0,k}$ (if $k>1$) corresponding to maxima of $cos(\phi_k(t))$ and $s_{min,k}(n)$ is another cubic spline interpolation through points from $y(n)$ (if $k=1$) or $x_{0,k}$ (if $k>1$) corresponding to minima of $cos(\phi_k(t))$. After finding the empirical offset, the empirical IA can be approximated by 
+\begin{equation}
+    r_1(n) = s_{ext,k}(n)
+\end{equation}
+where $s_{ext,k}(n)$ is a cubic spline interpolation through the maxima of
+\begin{equation}
+    g_k(n) = \left\{ \begin{array}{*{20}{c}}
+    {|y(n) - x_{0,k}(n)|} & {k=1} \\
+    {|x_{0,k-1}(n) - x_{0,k}(n)|} & {k>1}. \\
+    \end{array} \right.
+\end{equation}
+The process can then be repeated by computing the CPT on $x_{0,1}(n)$ to find $\phi_2(n)$. Then $\phi_2(n)$ can be used to  find $x_{0,2}(n)$ and $r_2(n)$ can be found using $x_{0,1}(n)$ and $x_{0,2}(n)$. For a full decomposition, this procedure should be repeated until $x_{0,k}(n)$ is monotonic. The steps of the CPT EMD algorithm are presented in Algorithm~\ref{CPTEMDAlgorithm} and a graphical explanation can be seen in Fig.~\ref{CPT_EMD}.
 
-% \section{The CPT for Empirical Mode Decomposition}\label{sect:CPTEMDSection}
-% For low noise signals, the CPT can be used as an alternative to the sifting process of the HHT to create an empirical mode decomposition (EMD). The CPT EMD models the signal as
-% \begin{eqnarray}
-%     y(n) &=& x_{0,K}(n) + \sum_{k=1}^{K}x_k(n) + \varepsilon(n) \\
-%     x_k\left(n\right) &=& r_k\left(n\right)cos\left(\phi_k\left(n\right)\right),
-% \end{eqnarray}
-% where the subscript $k$ indexes the $K$ intrinsic mode functions (IMFs), $x_k(n)$, of the EMD. The IP, $\phi_k(n)$, for each IMF is estimated using the CPT. The IMFs are ordered such that the highest frequency component corresponds to $k=1$. For the first IMF $x_1(n)$, we can consider $x_{0,1}(n)$ as a modulation term. If $x_{0,1}(n)$ also has modulations then it can be decomposed into an oscillatory term $x_2(n)$ and an offset (another modulating term) $x_{0,2}(n)$. The process can be repeated until all $K$ oscillatory modes are extracted from $y(n)$, leaving the final offset term $x_{0,K}(n)$.
-% As we have demonstrated, the IP can be estimated using the CPT without the requirement of sifting. However, for complicated signals, the estimates of IA and offset are not accurate enough to be used in the decomposition. Therefore, an empirical method is used for approximating the IA, $r_k(n)$, and offset, $x_{0,k}(n)$ to perform the CPT EMD. The empirical method used for estimating the IA in the CPT EMD is similar to the method used in the normalized Hilbert transform for separating the IA from the IP components~\cite{Huang2005}. The empirical offset, $x_{0,k}(n)$ is approximated by
-% \begin{equation}
-%     x_{0,k}(n) = \frac{s_{max,k}(n) + s_{min,k}(n)}{2},
-% \end{equation}
-% where $s_{max,k}(n)$ is a cubic spline interpolation through points from $y(n)$ (if $k=1$) or $x_{0,k}$ (if $k>1$) corresponding to maxima of $cos(\phi_k(t))$ and $s_{min,k}(n)$ is another cubic spline interpolation through points from $y(n)$ (if $k=1$) or $x_{0,k}$ (if $k>1$) corresponding to minima of $cos(\phi_k(t))$. After finding the empirical offset, the empirical IA can be approximated by 
-% \begin{equation}
-%     r_1(n) = s_{ext,k}(n)
-% \end{equation}
-% where $s_{ext,k}(n)$ is a cubic spline interpolation through the maxima of
-% \begin{equation}
-%     g_k(n) = \left\{ \begin{array}{*{20}{c}}
-%     {|y(n) - x_{0,k}(n)|} & {k=1} \\
-%     {|x_{0,k-1}(n) - x_{0,k}(n)|} & {k>1}. \\
-%     \end{array} \right.
-% \end{equation}
-% The process can then be repeated by computing the CPT on $x_{0,1}(n)$ to find $\phi_2(n)$. Then $\phi_2(n)$ can be used to  find $x_{0,2}(n)$ and $r_2(n)$ can be found using $x_{0,1}(n)$ and $x_{0,2}(n)$. For a full decomposition, this procedure should be repeated until $x_{0,k}(n)$ is monotonic. The steps of the CPT EMD algorithm are presented in Algorithm~\ref{CPTEMDAlgorithm} and a graphical explanation can be seen in Fig.~\ref{CPT_EMD}.
-% 
-% Note that the IA and offset approximations are made using only the IP estimate. The IP can be estimated more accurately than the IA and offset from data, since we know the unwrapped IP is a monotonic function of time.
-% 
-% The minimum segment size to perform the CPT should be set the same way as described earlier, such that the tangent vector is in the direction of the signal's trajectory in the phase-plane. However, the maximum number of samples should be made sufficiently large such the lower frequency components can be accurately modelled. This does not mean that there should be a dramatic increase in $Q_{max}$, as the lower frequency components become more regular and less noisy, therefore can be modeled by relatively smaller arc lengths.
-% 
-% An advantage of the CPT EMD over the HHT is that the IA structure is maintained and the IP estimate is not subject to the nonlocal effects of the interpolation in the sifting process. In addition, as demonstrated in Section~\ref{sect:NoisySignalsSection} the CPT can estimate the IP in the presence of mild disturbances thereby alleviating problems from intra-mode mixing. By combining techniques from the HHT and normalized Hilbert transform, an improved and more meaningful EMD is achieved. This demonstrates the advantage of the CPT EMD method. %An examples of using the CPT with an EEG signal is presented in section~\ref{EEGExampleSection}.
+Note that the IA and offset approximations are made using only the IP estimate. The IP can be estimated more accurately than the IA and offset from data, since we know the unwrapped IP is a monotonic function of time.
+
+The minimum segment size to perform the CPT should be set the same way as described earlier, such that the tangent vector is in the direction of the signal's trajectory in the phase-plane. However, the maximum number of samples should be made sufficiently large such the lower frequency components can be accurately modelled. This does not mean that there should be a dramatic increase in $Q_{max}$, as the lower frequency components become more regular and less noisy, therefore can be modeled by relatively smaller arc lengths.
+
+An advantage of the CPT EMD over the HHT is that the IA structure is maintained and the IP estimate is not subject to the nonlocal effects of the interpolation in the sifting process. In addition, as demonstrated in Section~\ref{sect:NoisySignalsSection} the CPT can estimate the IP in the presence of mild disturbances thereby alleviating problems from intra-mode mixing. By combining techniques from the HHT and normalized Hilbert transform, an improved and more meaningful EMD is achieved. This demonstrates the advantage of the CPT EMD method. %An examples of using the CPT with an EEG signal is presented in section~\ref{EEGExampleSection}.
 % 
 % \begin{figure}
 % \centering

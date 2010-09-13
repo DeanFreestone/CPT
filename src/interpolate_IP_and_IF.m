@@ -10,6 +10,8 @@ IF_interp = interp1(IF_good_indexes,IF_good_values,1:length(IF));
 
 phi_good_indexes = find(~isnan(phi_unwrapped));
 phi_good_values = phi_unwrapped(~isnan(phi_unwrapped));
+% phi_interp = interp1(phi_good_indexes,phi_good_values,1:length(phi_unwrapped));
+
 phi_interp = pchip(phi_good_indexes,phi_good_values,1:length(phi_unwrapped));
 
 % phi_interp = medfilt1(phi_interp,20);

@@ -102,11 +102,15 @@ for n=1:length(sigma)
         snr_end = (rms_y_end/rms_n_end)^2;
         snr_db_end(nn,n) = 10*log10(snr_end);
 
-        [IF_interp, phi_interp, phi_unwrapped, x, Hx, r, phi, x0, Hx0, m_star, M] ...
-            = cpt(y_n, MinPoints, MaxPoints, PointsStep, Ts, PlotMode, f_max);
+%         [IF_interp, phi_interp, phi_unwrapped, x, Hx, r, phi, x0, Hx0, m_star, M] ...
+%             = cpt(y_n, MinPoints, MaxPoints, PointsStep, Ts, PlotMode, f_max);
+%         phi_est = mod(phi_interp,2*pi);
 
-        phi_est = mod(phi_interp,2*pi);
-
+        DesiredArcLength = 3*pi/4;
+        theta_diff_thresh = pi;
+        [phi r] = CPTfunction(y_n,Ts,DesiredArcLength,theta_diff_thresh,f_max);
+        phi_est = mod(phi, 2*pi);
+        
         phi_diff = min( (repmat(true_IP,3,1) - [phi_est-2*pi ; phi_est ; phi_est + 2*pi]).^2 ,[],1); 
         phi_diff_start = phi_diff(EdgeEffectSample:s_1);
         phi_diff_mid = phi_diff(s_1:s_2);
@@ -172,24 +176,24 @@ end
 xticklabelstart = fliplr(xticklabelstart);
 xticklabelmid = fliplr(xticklabelmid);
 xticklabelend = fliplr(xticklabelend);
-
+y_max = 50;
 subplotextension = 0.055;
 boxplotfig = figure('units','normalized','position',[0 0 1 1]);
 ax(1) = subplot(1,3,1,'parent',boxplotfig,'units','normalized');
-boxplot(RMSE_start,roundlabelstart,'parent',ax(1))
+boxplot(RMSE_start*100/pi,roundlabelstart,'parent',ax(1))
 ylim(ax(1),[0 y_max])
 pos = get(ax(1),'position');
 set(ax(1),'xtick',1:9,'xticklabel',xticklabelstart,'fontsize',FS,'position',[pos(1)-subplotextension/2 pos(2) pos(3)+subplotextension pos(4)])
 ylabel(ax(1),'RMSE CPT','fontsize',FS)
 
 ax(2) = subplot(1,3,2,'parent',boxplotfig,'units','normalized');
-boxplot(RMSE_mid,roundlabelmid,'parent',ax(2))
+boxplot(RMSE_mid*100/pi,roundlabelmid,'parent',ax(2))
 ylim(ax(2),[0 y_max])
 pos = get(ax(2),'position');
 set(ax(2),'xtick',1:9,'xticklabel',xticklabelmid,'yticklabel',{''},'fontsize',FS,'position',[pos(1)-subplotextension/2 pos(2) pos(3)+subplotextension pos(4)])
 
 ax(3) = subplot(1,3,3,'parent',boxplotfig,'units','normalized');
-boxplot(RMSE_end,roundlabelend,'parent',ax(3))
+boxplot(RMSE_end*100/pi,roundlabelend,'parent',ax(3))
 ylim(ax(3),[0 y_max])
 pos = get(ax(3),'position');
 set(ax(3),'xtick',1:9,'xticklabel',xticklabelend,'yticklabel',{''},'fontsize',FS,'position',[pos(1)-subplotextension/2 pos(2) pos(3)+subplotextension pos(4)])

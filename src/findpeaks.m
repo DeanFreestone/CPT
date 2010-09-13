@@ -20,4 +20,3 @@ n(u) = n(u)+1;
 % xlabel('Samples')
 % legend('Samples with +ve gradient','On off times of +ve gradient')
 % ylim([-1.1 1.1])
-% ylabel('fuck ass')
