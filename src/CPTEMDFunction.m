@@ -14,24 +14,25 @@ clc
 % y = cos(2*pi*f*t);
 
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Fs = 1e3;                               % samples/second
-Ts = 1/Fs;                              % sample period (radians)
-Duration = 3;                         % seconds
-NSamples = Duration*Fs;
-t{1} = linspace(0,Duration,NSamples);
 
-f1 = 7;                    Theta1 = 2*pi*f1*t{1};                % frequency Hz
-f2 = 13;                  Theta2 = 2*pi*f2*t{1};
-f_max = 1*f2;
-
-alpha = 1;
-A1 = 1/(f1^alpha);              % power falls off at 1/(f^2) and amplitude falls away at 1/f
-A2 = 1/(f2^alpha);   
-
-x1 = A1*cos(Theta1);
-x2 = A2*cos(Theta2);
-
-y = x1 + x2;
+% Fs = 1e3;                               % samples/second
+% Ts = 1/Fs;                              % sample period (radians)
+% Duration = 3;                         % seconds
+% NSamples = Duration*Fs;
+% t{1} = linspace(0,Duration,NSamples);
+% 
+% f1 = 7;                    Theta1 = 2*pi*f1*t{1};                % frequency Hz
+% f2 = 13;                  Theta2 = 2*pi*f2*t{1};
+% f_max = 1*f2;
+% 
+% alpha = 1;
+% A1 = 1/(f1^alpha);              % power falls off at 1/(f^2) and amplitude falls away at 1/f
+% A2 = 1/(f2^alpha);   
+% 
+% x1 = A1*cos(Theta1);
+% x2 = A2*cos(Theta2);
+% 
+% y = x1 + x2;
 
 % ~~~~~~~~~~~~~~~~~~~
 % ~~~~~~~~~~~~~~~~~~~
@@ -45,8 +46,8 @@ Ts = 1/Fs;
 % pick channel
 x = detrend(Data(1:end-round(Fs*2),end) - Data(1:end-round(2*Fs),end-1));
 % x = detrend(Data(:,end-1));
-
-t{1} = 0:1/Fs:(length(x)-1)/Fs;        % seconds
+NSamples = length(x);
+t{1} = 0:Ts:(length(x)-1)/Fs;        % seconds
 
 clear data
 
@@ -73,15 +74,20 @@ psi = pi;
 foundarc = true;
 res{1} = y;
 m=1;
-InitialArcSamples = 20;                                   % Number of samples in the first try to find the 'DesiredArcLength'
+InitialArcSamples = 10;                                   % Number of samples in the first try to find the 'DesiredArcLength'
+init_b_f = InitialArcSamples*ones(1,NSamples);
 
 % run emd
 while foundarc
     
-    [foundarc phi{m} r{m} t{m} firstindex lastindex  ArcPoints TangentPoints] = CPTfunction(res{m}, t{m}, Ts, psi, f_max);
+    figure
+    plot(init_b_f)
+    drawnow
+    
+    [foundarc phi{m} r{m} t{m} firstindex lastindex  ArcPoints TangentPoints] = CPTfunction(res{m}, t{m}, Ts, psi, f_max, init_b_f);
     
     temp = res{m};
-    res{m} = temp(firstindex:lastindex);
+    res{m} = temp(firstindex:lastindex);            % now res is the same length as t
     
     if foundarc
         
@@ -125,7 +131,21 @@ while foundarc
                 res{m} = (s1(spline_index)+s2(spline_index))/2;        % this is the residue or the detrending line
                 NSamples = length(res{m});
                 t_temp = t{m-1};
-                t{m} = t_temp(spline_index);
+                t{m} = t_temp(spline_index);                    % t is shrunk according to the spline indexes
+                
+%                 temp = res{m-1};
+%                 temp = temp(spline_index);
+%                 r_hat{m-1} = abs(temp-res{m});
+%                 temp = phi{m-1};
+%                 temp = temp(spline_index);
+%                 phi_hat{m-1} = temp;
+%                 temp = t{m-1};
+%                 t_hat{m-1} = temp(spline_index);
+                
+                % here we cut down the edges of the arcs the define the bit
+                % we fit the circle to and the tangent
+                temp = [ArcPoints(:,spline_index); TangentPoints(:,spline_index)];
+                init_b_f  = min(temp,[],1);
                 
                 % ~~~~~~~~~~~
                 figure
@@ -149,9 +169,20 @@ while foundarc
     end
 end
 
-for n=1:5
+% subplotmax = 3;
+% for n=1:subplotmax
+%     
+%     subplot(subplotmax,1,n)
+%     plot(t_hat{n},r_hat{n}.*cos(phi_hat{n})),hold on
+%     plot(t{n},res{n},'r')
+%     hold off
+% end
+
+figure
+subplotmax = 3;
+for n=1:subplotmax
     
-    subplot(5,1,n)
+    subplot(subplotmax,1,n)
     plot(t{n},r{n}.*cos(phi{n})),hold on
     plot(t{n},res{n},'r')
     hold off

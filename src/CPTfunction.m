@@ -1,9 +1,8 @@
-function [foundarc phi r t firstindex lastindex ArcPoints TangentPoints] = CPTfunction(y, t, Ts, psi, f_max)
+function [foundarc phi r t firstindex lastindex ArcPoints TangentPoints] = CPTfunction(y, t, Ts, psi, f_max,init_b_f)
 
 % ploton = true;
 ploton = false;
 
-InitialArcSamples = 20;                                   % Number of samples in the first try to find the 'DesiredArcLength'
 CounterLimit = 5; 
 
 % initialize things for speed
@@ -26,16 +25,28 @@ SampleThreshold = 2/Ts;
 
 SampleForwardBackFlag = false;              % if the number of sample to fit arc gets too big, change flag
 
+% InitialArcSamples = 20;                                   % Number of samples in the first try to find the 'DesiredArcLength'
+init_b = init_b_f;%floor(InitialArcSamples/2)*ones(1,NSamples);
+init_f = init_b_f;%floor(InitialArcSamples/2)*ones(1,NSamples);
+
 % cycle through all samples to find circle fits
-for n=floor(InitialArcSamples/2)+1:NSamples-floor(InitialArcSamples/2)-1
+for n=init_b(1)+1:NSamples - init_f(1)-1
     
     if ~SampleForwardBackFlag               % this means we have had to look too far to find an arc, so we stop. If we dont reset the flag we dont go into the while loop.
         flag = false;                                                                   % initialize / reset arc length indicator flag, this flag tells us when to get out of the while loop below
     end
     
     P_yn = P_y(:,n);                                                            % point of interest where we want to fit the circle
-    b_t_final = floor(InitialArcSamples/2);                         % number of samples back in time from point of interest to build arc for circle fit
-    f_t_final = floor(InitialArcSamples/2);                  % number of samples forward in time
+    if (init_b(n) < n) && (n+init_f(n)  < NSamples)
+        b_t_final = init_b(n);                         % number of samples back in time from point of interest to build arc for circle fit
+        f_t_final = init_f(n);                  % number of samples forward in time
+    elseif (n+init_b(n)  > NSamples)
+        b_t_final = floor((NSamples - n)/2)-1;
+        f_t_final = b_t_final;
+    else
+        b_t_final = n-1;                         % number of samples back in time from point of interest to build arc for circle fit
+        f_t_final = n-1;                  % number of samples forward in time
+    end
     b = b_t_final;
     f = f_t_final;
 
@@ -49,6 +60,9 @@ for n=floor(InitialArcSamples/2)+1:NSamples-floor(InitialArcSamples/2)-1
     while flag ~= true
                
         % this distance will decide if we increment b or f.
+        if b > n
+            disp('error')
+        end
         DistBack = norm(P_yn - P_y(:,n-b));            % Euclidean distance between center and back edge of arc
         DistForward = norm(P_yn - P_y(:,n+f));      % Euclidean distance between center and forward edge of arc
         
@@ -208,8 +222,12 @@ for n=floor(InitialArcSamples/2)+1:NSamples-floor(InitialArcSamples/2)-1
     y_s = y( n-ArcPoints(1,n) : n+ArcPoints(2,n) );
     Hy_s = Hy( n-ArcPoints(1,n) : n+ArcPoints(2,n) );
 
+    if n+TangentPoints(2,n) > NSamples
+        disp('error')
+    end
     Tangent(:,n) = [y(n+TangentPoints(2,n)) - y(n-TangentPoints(1,n)) 
         Hy(n+TangentPoints(2,n)) - Hy(n-TangentPoints(1,n))];
+
     a(:,n) = [Tangent(2,n) ; -Tangent(1,n)];      % normal to the tangent
 
     XY = [y_s ; Hy_s]';                                                % segment in matrix so we can use the circle fit
@@ -268,7 +286,6 @@ if ~SampleForwardBackFlag
     % detect the invalid phase changes, find indexes for incorrect phase
     % transition
     PhaseIncIndexes = ~(( (delta_phi > 0) & (delta_phi < 2*beta_p) ) | (delta_phi < alpha_p));
-%     PhaseIncIndexes = ~( (delta_phi > 0) | (delta_phi < alpha_p));
 
     % we don't know if it was the later or earlier phase estimate that was
     % know so we set them both to nan.
@@ -308,20 +325,11 @@ if ~SampleForwardBackFlag
         end
     end
 
-
-%     phi = phi_temp;
-%     r = r_temp;
-%     x = x_temp;
-%     Hx = Hx_temp;
-%     x(IndexesForNan) = nan;
-%     Hx(IndexesForNan) = nan;
-%     phi(IndexesForNan) = nan;
-%     r(IndexesForNan) = nan;
     if ploton
         figure
         PlotLim = 1.5*max(y);
         MS = 20;
-        for n=floor(InitialArcSamples/2)+1:NSamples-floor(InitialArcSamples/2)-1
+        for n=b_init(1)+1:NSamples-f_init(1)-1
 
             y_s = y(n-ArcPoints(1,n):n+ArcPoints(2,n));
             Hy_s = Hy(n-ArcPoints(1,n):n+ArcPoints(2,n));
