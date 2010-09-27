@@ -39,6 +39,7 @@ clc
 % ~~~~~~~~~~~~~~~~~~~
 
 % load CSGridDepth200608CS33_19900_Chs_1_48_200s
+
 load HGSP7_98s_seizure
 Fs = 4069.010498046875;     % Hz
 Ts = 1/Fs;
@@ -56,7 +57,7 @@ x = medfilt1(x,20);
 
 % low pass filter file at 40 Hz
 Fc = [2.5 95];                                % Hz
-f_max = 500;
+f_max = 200;
 Wc = Fc/(Fs/2);                     % normalised digital frequency
 [b a] = butter(3,Wc);
 y = filtfilt(b,a,x)';
@@ -68,7 +69,7 @@ y = filtfilt(b,a,x)';
 
 
 %parameters for the cpt
-psi = pi;
+psi = 3*pi/2;
 
 % initialise emd
 foundarc = true;
@@ -76,16 +77,16 @@ res{1} = y;
 m=1;
 InitialArcSamples = 10;                                   % Number of samples in the first try to find the 'DesiredArcLength'
 init_b_f = InitialArcSamples*ones(1,NSamples);
-
+zeta = 1;
 % run emd
 while foundarc
     
-    figure
-    plot(init_b_f)
-    drawnow
+%     figure
+%     plot(init_b_f)
+%     drawnow
     
-    [foundarc phi{m} r{m} t{m} firstindex lastindex  ArcPoints TangentPoints] = CPTfunction(res{m}, t{m}, Ts, psi, f_max, init_b_f);
-    
+    [foundarc phi{m} r{m} t{m} firstindex lastindex  ArcPoints TangentPoints] = CPTfunction(res{m}, t{m}, Ts, psi, f_max, init_b_f,zeta);
+    zeta = zeta+2;
     temp = res{m};
     res{m} = temp(firstindex:lastindex);            % now res is the same length as t
     
@@ -160,9 +161,9 @@ while foundarc
                 drawnow
                 %  ~~~~~~~~~~~~~~
                 
-                figure
-                plot(phi{m-1})
-                ylabel(['\phi_' num2str(m) '(n)'])
+%                 figure
+%                 plot(phi{m-1})
+%                 ylabel(['\phi_' num2str(m) '(n)'])
                 % ~~~~~~~~~~~~~~~
             end
         end

@@ -1,9 +1,9 @@
-function [foundarc phi r t firstindex lastindex ArcPoints TangentPoints] = CPTfunction(y, t, Ts, psi, f_max,init_b_f)
+function [foundarc phi r t firstindex lastindex ArcPoints TangentPoints] = CPTfunction(y, t, Ts, psi, f_max,init_b_f,zeta)
 
 % ploton = true;
 ploton = false;
 
-CounterLimit = 5; 
+CounterLimit = zeta*5; 
 
 % initialize things for speed
 foundarc = false;                       % this is a flag that is used in the cpt emd. it is set if an arc is found. if not the emd should end.
@@ -30,7 +30,7 @@ init_b = init_b_f;%floor(InitialArcSamples/2)*ones(1,NSamples);
 init_f = init_b_f;%floor(InitialArcSamples/2)*ones(1,NSamples);
 
 % cycle through all samples to find circle fits
-for n=init_b(1)+1:NSamples - init_f(1)-1
+for n=init_b(1)+1:NSamples - init_f(1)-zeta
     
     if ~SampleForwardBackFlag               % this means we have had to look too far to find an arc, so we stop. If we dont reset the flag we dont go into the while loop.
         flag = false;                                                                   % initialize / reset arc length indicator flag, this flag tells us when to get out of the while loop below
@@ -40,7 +40,7 @@ for n=init_b(1)+1:NSamples - init_f(1)-1
     if (init_b(n) < n) && (n+init_f(n)  < NSamples)
         b_t_final = init_b(n);                         % number of samples back in time from point of interest to build arc for circle fit
         f_t_final = init_f(n);                  % number of samples forward in time
-    elseif (n+init_b(n)  > NSamples)
+    elseif (n+init_f(n)  >= NSamples)
         b_t_final = floor((NSamples - n)/2)-1;
         f_t_final = b_t_final;
     else
@@ -60,7 +60,7 @@ for n=init_b(1)+1:NSamples - init_f(1)-1
     while flag ~= true
                
         % this distance will decide if we increment b or f.
-        if b > n
+        if (b > n) || (n+f > NSamples)
             disp('error')
         end
         DistBack = norm(P_yn - P_y(:,n-b));            % Euclidean distance between center and back edge of arc
@@ -70,9 +70,9 @@ for n=init_b(1)+1:NSamples - init_f(1)-1
             
             if DistBack <= DistForward
                 
-                if n-(b+1) > 0                         % make sure we don't go into negative indexes
+                if n-(b+zeta) > 0                         % make sure we don't go into negative indexes
                     
-                    b = b + 1; 
+                    b = b + zeta; 
                     p_b = P_y(:,n-b) - P_yn;
                     
                 else                                         % we are at the edge of the time series so we need to stop
@@ -89,9 +89,9 @@ for n=init_b(1)+1:NSamples - init_f(1)-1
                 
             elseif DistBack > DistForward
                 
-                if n+f < NSamples           % make sure we don't try to index something longer than the time series
+                if n+f+zeta < NSamples           % make sure we don't try to index something longer than the time series
                     
-                    f = f + 1;
+                    f = f + zeta;
                     p_f = P_y(:,n+f) - P_yn;
                     
                 else
