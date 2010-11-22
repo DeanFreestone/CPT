@@ -1,9 +1,9 @@
-function [foundarc phi r t firstindex lastindex ArcPoints TangentPoints] = CPTfunction(y, t, Ts, psi, f_max,init_b_f,zeta)
+function [foundarc phi phi_unwrapped r t firstindex lastindex ArcPoints TangentPoints] = CPTfunction(y, t, Ts, psi, f_max,init_b_f,zeta)
 
 % ploton = true;
 ploton = false;
 
-CounterLimit = zeta*5; 
+CounterLimit = 5; 
 
 % initialize things for speed
 foundarc = false;                       % this is a flag that is used in the cpt emd. it is set if an arc is found. if not the emd should end.
@@ -25,9 +25,8 @@ SampleThreshold = 2/Ts;
 
 SampleForwardBackFlag = false;              % if the number of sample to fit arc gets too big, change flag
 
-% InitialArcSamples = 20;                                   % Number of samples in the first try to find the 'DesiredArcLength'
-init_b = init_b_f;%floor(InitialArcSamples/2)*ones(1,NSamples);
-init_f = init_b_f;%floor(InitialArcSamples/2)*ones(1,NSamples);
+init_b = init_b_f;     
+init_f = init_b_f;      
 
 % cycle through all samples to find circle fits
 for n=init_b(1)+1:NSamples - init_f(1)-zeta
@@ -37,83 +36,97 @@ for n=init_b(1)+1:NSamples - init_f(1)-zeta
     end
     
     P_yn = P_y(:,n);                                                            % point of interest where we want to fit the circle
+    
+    % now there is no guarantee for the emd that the n-b or n+f will be in
+    % the data range because the signal gets shorter with each step of the
+    % decomposition. Therefore we need to make some checks
+    
+    % first check if we are in range
     if (init_b(n) < n) && (n+init_f(n)  < NSamples)
         b_t_final = init_b(n);                         % number of samples back in time from point of interest to build arc for circle fit
-        f_t_final = init_f(n);                  % number of samples forward in time
+        f_t_final = init_f(n);                          % number of samples forward in time
+        
+     % if we are not within range check if we are over the edge and make
+     % the size of the arc as large as possible
     elseif (n+init_f(n)  >= NSamples)
         b_t_final = floor((NSamples - n)/2)-1;
         f_t_final = b_t_final;
+        flag = true;                    % we don't need to go through the loop because we at an edge
     else
+        
+    % we are over the start, so we make the arc as large as possible.
         b_t_final = n-1;                         % number of samples back in time from point of interest to build arc for circle fit
-        f_t_final = n-1;                  % number of samples forward in time
+        f_t_final = n-1;                            % number of samples forward in time
+        flag = true;                    % we don't need to go through the loop because we at an edge
     end
+    
     b = b_t_final;
     f = f_t_final;
+    b_final = b;
+    f_final = f;
 
-    theta = pi;                                                                     % initialize angle describing arc length, which should be decreasing as we iterate through the while loop
-    m = 1;                                                                          % initialize indexing parameter
-    ArcCounter = 0;                                                                    % this counter helps us deal with noise by making sure we have a suficent number of arc below the desired arc length to be sure noise hasn't caused a false detection
+%     theta = pi;                                     % initialize angle describing arc length, which should be decreasing as we iterate through the while loop
+    ArcCounter = 0;                             % this counter helps us deal with noise by making sure we have a suficent number of arc below the desired arc length to be sure noise hasn't caused a false detection
     TangentCounter = 0;
     CuspCounter = 0;
     
+    % we go through this only on the first time through
+    p_b = P_y(:,n-b) - P_yn;
+    p_f = P_y(:,n+f) - P_yn;
+    
+    theta = acos(dot(p_f,p_b) / (norm(p_b)*norm(p_f)));
+    psi_hat = 2*(pi - theta);                               % estimated arc length
+            
     % cycle through various arc lengths until the arc angle is correct
     while flag ~= true
                
-        % this distance will decide if we increment b or f.
         if (b > n) || (n+f > NSamples)
-            disp('error')
+            disp('error')                           % for checking
         end
+        
+        % these distances will decide if we increment b or f.
         DistBack = norm(P_yn - P_y(:,n-b));            % Euclidean distance between center and back edge of arc
         DistForward = norm(P_yn - P_y(:,n+f));      % Euclidean distance between center and forward edge of arc
         
-        if m>1              % if it is not the firsat time through the while loop
-            
-            if DistBack <= DistForward
-                
-                if n-(b+zeta) > 0                         % make sure we don't go into negative indexes
-                    
-                    b = b + zeta; 
-                    p_b = P_y(:,n-b) - P_yn;
-                    
-                else                                         % we are at the edge of the time series so we need to stop
-                    
-                    flag = true;                                        % we can't index any further back
+        if DistBack <= DistForward
 
-                    b_t_final = b;
-                    f_t_final = f;
+            if n-round(b+zeta) > 0                         % make sure we don't go into negative indexes
 
-                    b_final = b;
-                    f_final = f;
-                    
-                end
-                
-            elseif DistBack > DistForward
-                
-                if n+f+zeta < NSamples           % make sure we don't try to index something longer than the time series
-                    
-                    f = f + zeta;
-                    p_f = P_y(:,n+f) - P_yn;
-                    
-                else
-                    
-                    flag = true;                                        % we can't index any further forward
+                b = round(b + zeta); 
+                p_b = P_y(:,n-b) - P_yn;
 
-                    b_t_final = b;
-                    f_t_final = f;
-                    
-                    b_final = b;
-                    f_final = f;
-                    
-                end
+            else                                         % we are at the edge of the time series so we need to stop
+
+                flag = true;                                        % we can't index any further back
+
+                b_t_final = b;
+                f_t_final = f;
+
+                b_final = b;
+                f_final = f;
+
             end
-        else
-            
-            % we go through this only on the first time through
-            p_b = P_y(:,n-b) - P_yn;
-            p_f = P_y(:,n+f) - P_yn;
-            
+
+        elseif DistBack > DistForward
+
+            if n+round(f+zeta) < NSamples           % make sure we don't try to index something longer than the time series
+
+                f = round(f + zeta);
+                p_f = P_y(:,n+f) - P_yn;
+
+            else
+
+                flag = true;                                        % we can't index any further forward
+
+                b_t_final = b;
+                f_t_final = f;
+
+                b_final = b;
+                f_final = f;
+
+            end
         end
-        
+            
         % find angle between points at the edge of the arc
         theta_previous = theta;
         theta = acos(dot(p_f,p_b) / (norm(p_b)*norm(p_f)));
@@ -196,8 +209,6 @@ for n=init_b(1)+1:NSamples - init_f(1)-zeta
                 
                 foundarc = true;            % means we can keep going with the EMD
 
-%                 disp(['\theta = ' num2str(theta) ', \hat\psi = ' num2str(psi_hat)])
-
             end
             
         else
@@ -205,9 +216,7 @@ for n=init_b(1)+1:NSamples - init_f(1)-zeta
             ArcCounter = 0;
             
         end
-        
-        m=m+1;          
-        
+                
         % if b or f have gotten to big we want to stop.
         if (b > SampleThreshold) || (f > SampleThreshold)           
             SampleForwardBackFlag = true;
@@ -363,7 +372,12 @@ if ~SampleForwardBackFlag
 
     % interpolate missing values
     [IF_interp phi r t firstindex lastindex] = interpolate_IP_IA_and_IF(phi_unwrapped,r,t,Ts);
+else
+    firstindex = 1; 
+    lastindex = size(ArcPoints,2);
+    phi_unwrapped = zeros(1,length(phi));
+    pause
 end
-
 ArcPoints = ArcPoints(:,firstindex:lastindex);
 TangentPoints = TangentPoints(:,firstindex:lastindex);
+phi_unwrapped = phi_unwrapped(firstindex:lastindex);

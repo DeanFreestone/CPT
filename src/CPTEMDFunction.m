@@ -5,6 +5,7 @@ close all
 clc
 
 % define the test signal
+% ~~~~~~~~~~~~~
 % t_max = 1;
 % Fs = 5e3;
 % Ts = 1/Fs;
@@ -15,24 +16,24 @@ clc
 
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-% Fs = 1e3;                               % samples/second
-% Ts = 1/Fs;                              % sample period (radians)
-% Duration = 3;                         % seconds
-% NSamples = Duration*Fs;
-% t{1} = linspace(0,Duration,NSamples);
-% 
-% f1 = 7;                    Theta1 = 2*pi*f1*t{1};                % frequency Hz
-% f2 = 13;                  Theta2 = 2*pi*f2*t{1};
-% f_max = 1*f2;
-% 
-% alpha = 1;
-% A1 = 1/(f1^alpha);              % power falls off at 1/(f^2) and amplitude falls away at 1/f
-% A2 = 1/(f2^alpha);   
-% 
-% x1 = A1*cos(Theta1);
-% x2 = A2*cos(Theta2);
-% 
-% y = x1 + x2;
+Fs = 1e3;                               % samples/second
+Ts = 1/Fs;                              % sample period (radians)
+Duration = 3;                         % seconds
+NSamples = Duration*Fs;
+t{1} = linspace(0,Duration,NSamples);
+
+f1 = 7;                    Theta1 = 2*pi*f1*t{1};                % frequency Hz
+f2 = 13;                  Theta2 = 2*pi*f2*t{1};
+f_max = 1*f2;
+
+alpha = 1;
+A1 = 1/(f1^alpha);              % power falls off at 1/(f^2) and amplitude falls away at 1/f
+A2 = 1/(f2^alpha);   
+
+x1 = A1*cos(Theta1);
+x2 = A2*cos(Theta2);
+
+y = x1 + x2;
 
 % ~~~~~~~~~~~~~~~~~~~
 % ~~~~~~~~~~~~~~~~~~~
@@ -56,37 +57,37 @@ clear data
 x = medfilt1(x,20);
 
 % low pass filter file at 40 Hz
-Fc = [2.5 95];                                % Hz
+Fc = [2 65];                                % Hz
 f_max = 200;
 Wc = Fc/(Fs/2);                     % normalised digital frequency
-[b a] = butter(3,Wc);
+[b a] = butter(2,Wc);
 y = filtfilt(b,a,x)';
 
 % ~~~~~~~~~~~~~~~~~~~
 % ~~~~~~~~~~~~~~~~~~~
 % ~~~~~~~~~~~~~~~~~~~
 
-
-
-%parameters for the cpt
-psi = 3*pi/2;
+% parameters for the cpt
+psi = 2*pi/2;
 
 % initialise emd
 foundarc = true;
 res{1} = y;
 m=1;
-InitialArcSamples = 10;                                   % Number of samples in the first try to find the 'DesiredArcLength'
+InitialArcSamples = 20;                                   % Number of samples in the first try to find the 'DesiredArcLength'
 init_b_f = InitialArcSamples*ones(1,NSamples);
 zeta = 1;
+
 % run emd
 while foundarc
     
 %     figure
 %     plot(init_b_f)
 %     drawnow
-    
-    [foundarc phi{m} r{m} t{m} firstindex lastindex  ArcPoints TangentPoints] = CPTfunction(res{m}, t{m}, Ts, psi, f_max, init_b_f,zeta);
-    zeta = zeta+2;
+    tic
+    [foundarc phi{m} phi_unwrapped{m} r{m} t{m} firstindex lastindex  ArcPoints TangentPoints] = CPTfunction(res{m}, t{m}, Ts, psi, f_max, init_b_f,zeta);
+    toc
+    zeta = 1.3*zeta;
     temp = res{m};
     res{m} = temp(firstindex:lastindex);            % now res is the same length as t
     
@@ -180,7 +181,7 @@ end
 % end
 
 figure
-subplotmax = 3;
+subplotmax = 1;
 for n=1:subplotmax
     
     subplot(subplotmax,1,n)
