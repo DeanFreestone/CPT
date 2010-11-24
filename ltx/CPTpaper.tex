@@ -1,9 +1,11 @@
 % journal,10pt,draftclsnofoot,onecolumn
 % \documentclass[journal,11pt,a4paper,onecolumn,draftcls]{IEEEtran}
 \documentclass[a4paper]{IEEEtran}
+% \documentclass[11pt,draftcls,onecolumn]{IEEEtran}
 \usepackage{graphicx, algorithm, algorithmicx, algpseudocode}
 \usepackage{color}                    % For creating coloured text and background
 \usepackage{amsmath,amssymb,amsfonts,epsfig} % Typical maths resource packages
+\usepackage{subfigure}
 
 \hyphenation{op-tical net-works semi-conduc-tor}
 % TODO environment
@@ -45,7 +47,7 @@ of Electrical and Electronic Engineering, University of Melbourne, VIC 3010, Aus
 \maketitle
 
 \begin{abstract}
-This paper introduces the circular phase transform (CPT), a new technique for estimation of the instantaneous phase, frequency and amplitude from broadband, nonstationary oscillatory signals. The CPT performs an adaptive demodulation of the analytic signal in the phase-plane. Conceptually, the CPT is similar to the Hilbert-Huang transform (HHT), where the instantaneous phase is estimated from a signal that has been adaptively demodulated. However, unlike the HHT, the CPT does not require an iterative numerical demodulation, thus allowing for estimates of the instantaneous amplitude. In addition, the CPT provides a more local estimate of the instantaneous phase providing more accurate results. We show how the CPT can be used in an empirical mode decomposition and provide an example using an electroencephalography signal. 
+\dean{Note: we get 10 pages with 10 point font.} \dean{Abstract less than 200 words (185 currently).} This paper introduces the circular phase transform (CPT), a new technique for estimation of the instantaneous phase, frequency and amplitude from broadband, nonstationary oscillatory signals. The CPT performs an adaptive demodulation of the analytic signal in the complex-plane. Conceptually, the CPT is similar to the Hilbert-Huang transform (HHT), where the instantaneous phase is estimated from a signal that has been adaptively demodulated. However, unlike the HHT, the CPT does not require an iterative numerical demodulation, thus allowing for estimates of the instantaneous amplitude. In addition, the CPT provides a more local estimate of the instantaneous phase providing more accurate results. A comparison is made between the CPT and methods the HHT. In addition, we show how the CPT can be used in an empirical mode decomposition and provide an example.
 \end{abstract}
 
 
@@ -57,7 +59,7 @@ Time-frequency analysis, nonlinear signal processing, Hilbert-Huang transform.
 \IEEEpeerreviewmaketitle
 
 \section{Introduction}
-\IEEEPARstart{T}{he} concept of instantaneous frequency (IF) may seem an oxymoron. If frequency is defined as the number of repeating events per unit time, then it is difficult to conceptualize it as an instantaneous quantity. However, the IF should simply be considered the best estimate of the frequency (with a sinusoidal basis) given an infinitesimally small segment of a signal. When considering a stationary sinusoid, the IF can be thought of as an extension to the Fourier frequency, where frequency is estimated using the rate of change of the instantaneous phase (IP), where the phase is defined as the entire argument of a cosine or sine function. In this case the IP is constant, therefore the IF and the Fourier frequency are equivalent. In general, the derivative of the instantaneous phase (IP) is the best estimate of the frequency at any point in time. By defining the IF as the derivative of the IP, time-frequency properties of nonstationary, frequency modulated signals, such as chirps, can be estimated. For example, if one was interested in studying sea level fluctuations at a point within a swell, then the IF of the sea level measurements would describe the process. 
+\IEEEPARstart{T}{he} concept of instantaneous frequency (IF) may seem an oxymoron. If frequency is defined as the number of repeating events per unit time, then it is difficult to conceptualize it as an instantaneous quantity. However, the IF should simply be considered the best estimate of the frequency (with a sinusoidal basis) given an infinitesimally small segment of a signal. The IF can be thought of as an extension to the Fourier frequency, where frequency is estimated using the rate of change of the instantaneous phase (IP), and the phase is defined as the entire argument of a cosine or sine function. In the case of a stationary sinusoid the IP is increasing at a constant rate and the IF is equivalent to the Fourier frequency. In general, the derivative of the instantaneous phase (IP) is the best estimate of the frequency at any point in time. By defining the IF as the derivative of the IP, time-frequency properties of nonstationary, frequency modulated signals, such as chirps, can be estimated. For example, if one was interested in studying sea level fluctuations at a point within a swell, then the IF of the sea level measurements would describe the process. 
 
 To demonstrate the procedure for calculating instantaneous amplitude (IA), instantaneous phase (IP), and instantaneous frequency (IF), we first consider a signal where all oscillations are centered at the origin described by
 \begin{equation}
@@ -71,7 +73,7 @@ where $p.v.$ denotes the Cauchy principal value integral and the Hilbert kernel 
 \begin{equation}\label{eq:HilbertKernel}
 	h\left( t \right) \triangleq {\left( {\pi t} \right)^{ - 1}}.
 \end{equation}
-For sinusoidal signals the Hilbert transform is a $\pi/2$ phase shifter, where a cosine function is transformed to a sine. The analytic signal, $z(t)$, is defined as
+For sinusoidal signals, the Hilbert transform is a $\pi/2$ phase shifter, where a cosine function is transformed to a sine. The analytic signal, $z(t)$, is defined as
 \begin{align}\label{eq:AnalyticSignal}
 	z\left( t \right) &\triangleq y\left( t \right) + j\mathcal{H}y\left( t \right) \\
     &= r\left( t \right)\left(\cos\left(\phi\left(t\right)\right) + j \mathcal{H}\cos\left(\phi\left(t\right)\right)\right) \\
@@ -160,27 +162,48 @@ Estimation of instantaneous properties from signals with oscillations not center
 %where the kernel $g(v,\tau)$ dictates the type of TFD. The simplest case of this TFD is the Wigner-Ville distribution~\cite{Ville1958} (where $g(v,\tau) = 1$) and can be interpreted as the Fourier transform of the autocorrelation of the analytic signal. Importantly, the first moment of the time-frequency distribution corresponds to the Fourier frequency~\cite{Boashash1992}. TFDs of this class are very useful for IF estimates of frequency modulated (FM) signals, but do not provide estimates of the instantaneous phase and amplitude. Therefore, to fully describe instantaneous properties of signals we must use other methods.
 
 % \section{Hilbert-Huang Transform}\label{HHTSection}
-The Hilbert-Huang transform (HHT)~\cite{Huang1998} is a relatively new method for estimating IP of nonlinear, nonstationary signals. Via a process known as empirical mode decomposition (EMD), the HHT decomposes a signal into the so-called intrinsic mode functions (IMFs). The trajectories of IMFs in the phase-plane have an orbit enclosing the origin, guaranteeing that the phase is monotonically increasing in time. Following this, the IP and IF can be defined using the Hilbert transform. The IMFs are extracted by an iterative procedure called `sifting', which can be considered adaptive detrending or demodulating. The sifting algorithm involves finding a cubic spline interpolation through all local minima and another spline through local maxima, taking the average of the two splines (forming an adaptive trend), and subtracting this away from the original signal. The sifting typically requires several iterations, as the demodulation at each iteration may introduce more extrema from inflections in the signal. The procedure continues until a stopping criterion is met, such that all modulations are removed from the signal (for example, the number of extrema equals the number of zero crossings, or is one less, and the splines are symmetric about the origin). Fig.~\ref{fig:HHTDemo} shows an example of the sifting process to extract the first IMF of a test signal
+The Hilbert-Huang transform (HHT)~\cite{Huang1998} is a relatively new method for estimating IP of nonlinear, nonstationary signals. Via a process known as empirical mode decomposition (EMD), the HHT decomposes a signal into the so-called intrinsic mode functions (IMFs). The trajectories of IMFs in the complex-plane have an orbit enclosing the origin, guaranteeing that the phase is monotonically increasing in time. Following this, the IP and IF can be defined using the Hilbert transform. The IMFs are extracted by an iterative procedure called `sifting', which can be considered adaptive detrending or demodulating. The sifting algorithm involves finding a cubic spline interpolation through all local minima and another spline through local maxima, taking the average of the two splines (forming an adaptive trend), and subtracting this away from the original signal. The sifting typically requires several iterations, as the demodulation at each iteration may introduce more extrema from inflections in the signal. The procedure continues until a stopping criterion is met, such that all modulations are removed from the signal (for example, the number of extrema equals the number of zero crossings, or is one less, and the splines are symmetric about the origin). Fig.~\ref{fig:HHTDemo} shows an example of the sifting process to extract the first IMF of a test signal
 \begin{equation}\label{eq:FirstTestSig}
 y\left( t \right) = a_1\cos \left(\omega_1t\right) + a_2\cos \left( \omega _2t \right),
 \end{equation}
-where $\omega = 2\pi f$, $f_1 = 7$ Hz, $f_2 = 17$ Hz, $a_1 = f_1^{-1}$ and $a_2=f_2^{-1}$. The example shows the four iterations, ordered from top to bottom, that were required to extract the first IMF. The sifting removes modulations and forms narrow-band components~\cite{Huang1998} allowing for estimation of the instantaneous properties using the Hilbert transform. Note, the implementation of the HHT used in all of the examples in this paper was downloaded from~\cite{Wu2009}. 
+where $\omega = 2\pi f$, $f_1 = 7$ Hz, $f_2 = 17$ Hz, $a_1 = f_1^{-1}$ and $a_2=f_2^{-1}$. The example shows the \dean{four} iterations, ordered from top to bottom, that were required to extract the first IMF. The sifting removes modulations and forms narrow-band components~\cite{Huang1998} allowing for estimation of the instantaneous properties using the Hilbert transform. Note, the implementation of the HHT used in all of the examples in this paper was downloaded from~\cite{Wu2009}. 
 
 The HHT has proved very useful in a range of applications involving nonlinear, nonstationary signal processing (see~\cite{Huang2008,Huang2005a} for reviews), including electroencephalography (EEG) signal analysis~\cite{Wang2008}, nonlinear system identification~\cite{Huang2005b}, and structural health monitoring~\cite{Pai2008}.
 
-An advance in the Hilbert-Huang transform involves normalizing the IMFs (by an approximation of the signal envelope) before computing the Hilbert transform~\cite{Huang2005}. The normalization is designed to separate the amplitude modulated and frequency modulated terms. By removing the IA component (or making it constant), the limitations stated in the Nuttall theorem~\cite{Nuttall1966} are addressed (improving the underestimates of the IF). However, the IF is still underestimated for non-trivial signals. This short-coming led to the development of the direct quadrature method, where the IP is estimated by simply taking the arccosine of the normalized IMFs. This provides a further improved IF estimate; however, problems occur with the estimation of the phase at time points corresponding to the extrema of the signal if the normalization is greater than $1$, which is technically hard to achieve. This is because the arccosine of a signal is not defined (or complex) at points where the extrema are greater than $1$. 
+An advance in the Hilbert-Huang transform involves normalizing the IMFs (by an approximation of the signal envelope) before computing the Hilbert transform~\cite{Huang2005}. The normalization is designed to separate the amplitude modulated and frequency modulated terms. By removing the IA component (or making it constant), the limitations stated in the Nuttall theorem~\cite{Nuttall1966} are addressed (improving the underestimates of the IF). However, the IF is still underestimated for non-trivial signals. This short-coming led to the development of the direct quadrature method, where the IP is estimated by simply taking the arccosine of the normalized IMFs. This provides a further improved IF estimate; however, problems occur with the estimation of the phase at time points corresponding to the extrema of the signal if the normalization is greater than $1$, which is technically hard to achieve. 
 
-A problem with the standard EMD is that it cannot deal with noise or disturbances in a consistent manner, where noise and signal may get mixed into different IMFs~\cite{Wu2009}. This problem is known as intra-mode mixing. The most recent development in the HHT is ensemble empirical mode decomposition (EEMD), which deals with this problem~\cite{Wu2009}. The EEMD is inspired by the noise-added analyses of Flandrin et al.~\cite{Flandrin2005} and Glendhill~\cite{Gledhill2003} and extends findings from other recent studies concerning the statistical properties of the EMD and white noise~\cite{Flandrin2004,Wu2004}. The EEMD defines an IMF as the mean of an ensemble of IMFs, with each member of the ensemble computed from the signal with a different realization of additive white noise. By adding white noise to the data, the EEMD acts like a dyadic filter bank enabling the correct separation of scales \cite{Flandrin2005a}.
+A problem with the standard EMD is that it cannot deal with noise or disturbances in a consistent manner, where noise and signal may get mixed into the same IMFs~\cite{Wu2009}. This problem is known as intra-mode mixing. The most recent development in the HHT is ensemble empirical mode decomposition (EEMD), which deals with this problem~\cite{Wu2009}. The EEMD is inspired by the noise-added analyses of Flandrin et al.~\cite{Flandrin2005} and Glendhill~\cite{Gledhill2003} and extends findings from other recent studies concerning the statistical properties of the EMD and white noise~\cite{Flandrin2004,Wu2004}. The EEMD defines an IMF as the mean of an ensemble of IMFs, with each member of the ensemble computed from the signal with a different realization of additive white noise. By adding white noise to the data, the EEMD acts like a dyadic filter bank enabling the correct separation of scales \cite{Flandrin2005a}.
 
-\begin{figure}
-\begin{center}
- \includegraphics[scale=0.42]{./Figures/HHTDemo.eps}
- \caption[HHTDemo]{Illustration of extraction of the first IMF via the sifting process of the test signal from Eq.~\ref{eq:FirstTestSig}. Each plot is an iteration of the sifting algorithm, ordered from top to bottom. The results shown are from a signal of 3 seconds in duration. The first and last seconds are removed to alleviate problems with edge effects. Four iterations of the sifting process are required to find the first IMF. \textbf{A.} The original signal $y_1(t)$, the extrema points, and upper and lower splines. \textbf{B.} The signal $y_2(t)$ is the original signal detrended by the mean of the corresponding splines from \textbf{A.} \textbf{C.} the third iteration. \textbf{D.} the first IMF of HHT. Note how the amplitude information has been removed and the splines are symmetric about zero.}
-\label{fig:HHTDemo}
-\end{center}
+\begin{figure}[h]
+	\centering
+		\subfigure[]{
+		\includegraphics[scale=1]{./Figures/eps/HHTDemoIteration1.eps}
+	\label{fig:label1}}
+		\subfigure[]{
+		\includegraphics[scale=1]{./Figures/eps/HHTDemoIteration2.eps}
+	\label{fig:label2}}
+		\subfigure[]{
+		\includegraphics[scale=1]{./Figures/eps/HHTDemoIteration3.eps}
+	\label{fig:label3}}
+		\subfigure[]{
+		\includegraphics[scale=1]{./Figures/eps/HHTDemoIteration4.eps}
+	\label{fig:label4}}
+		\subfigure[]{
+		\includegraphics[scale=1]{./Figures/eps/HHTDemoIteration5.eps}
+	\label{fig:label5}}
+	\label{fig:HHTDemo}
+	\caption{Illustration of the sifting procedure of the HHT for extracting the first IMF of the EMD for the test signal from Eq.~\ref{eq:FirstTestSig}. Each subfigure shows an iteration of the sifting procedure. a) The solid black line shows the original signal. The blue x markers show the local maxima. The blue dashed line show a cubic spline interpolation through the local maxima. The red + markers show the local minima. The red dashed line is a cubic spline interpolation through the local minima. The black dashed line is the average of the splines, forming an adaptive trend. b) The second iteration of the sifting algorithm. The solid black line is now the signal that has been detrended by the adaptive trend of the previous iteration. c)-e) The third, forth and fifth iteration of the sifting algorithm, where the signal was further detrended using the adaptive trend of the previous iteration.}
 \end{figure}
 
-The HHT has proved very useful; however, there are several issues concerning the interpretation of IMFs. For example, the physical meaning of the IA estimates from the HHT is not clear. This is due to amplitude distortions caused by the iterative sifting process. Furthermore, HHT IMFs are formed by interpolating extrema that may be relatively sparse in time, contradicting the notion of finding local instantaneous properties of a signal. These issues affect the standard HHT, the normalized HHT, the direct quadrature and EEMD methods since they all involve sifting. 
+% \begin{figure}
+% \begin{center}
+%  \includegraphics[scale=0.42]{./Figures/HHTDemo.eps}
+%  \caption[HHTDemo]{. Each plot is an iteration of the sifting algorithm, ordered from top to bottom. The results shown are from a signal of 3 seconds in duration. The first and last seconds are removed to alleviate problems with edge effects. Four iterations of the sifting process are required to find the first IMF. \textbf{A.} The original signal $y_1(t)$, the extrema points, and upper and lower splines. \textbf{B.} The signal $y_2(t)$ is the original signal detrended by the mean of the corresponding splines from \textbf{A.} \textbf{C.} the third iteration. \textbf{D.} the first IMF of HHT. Note how the amplitude information has been removed and the splines are symmetric about zero.}
+% \label{fig:HHTDemo}
+% \end{center}
+% \end{figure}
+
+The HHT has proved very useful and has been successfully applied to many engineering problems; however, there are several issues concerning the interpretation of IMFs. For example, the physical meaning of the IA estimates from the HHT is not clear. This is due to amplitude distortions caused by the iterative sifting process. Furthermore, HHT IMFs are formed by interpolating extrema that may be relatively sparse in time, contradicting the notion of finding local instantaneous properties of a signal. These issues affect the standard HHT, the normalized HHT, the direct quadrature and EEMD methods since they all involve sifting. 
 
 %Fig.~\ref{fig:HHTAmbiguity} provides an example of where inflection points cause problems for the HHT. For this example, we use the signal 
 % \begin{eqnarray}\label{eq:HHTAmbiguityTestSig}
@@ -200,7 +223,7 @@ This paper extends the notion of instantaneous phase, frequency and amplitude fo
 The Discussion and Conclusion follow in Sections~\ref{sect:DiscussionSection} and~\ref{sect:ConclusionSection}, respectively. 
 
 \section{The Circular Phase Transform}\label{sect:CPTDescriptionSection}
-The Circular Phase Transform (CPT) is a new method for estimating the instantaneous phase and amplitude (IP and IA) from nonstationary signals. Using the derivative of the IP, the instantaneous frequency (IF) can be calculated. The CPT is an alternative to the HHT that provides improved estimates of instantaneous properties of signals by obtaining more local IA and IP estimates. The CPT models a signal's local trajectory in the phase-plane as an arc of a circle. The circle center provides a new reference point for calculating the IP and IA, thereby acting as an adaptive demodulation.
+The Circular Phase Transform (CPT) is a new method for estimating the instantaneous amplitude (IA), instantaneous phase (IP), and instantaneous frequency (IF) from nonstationary signals. The CPT is an alternative to the HHT that provides improved estimates of instantaneous properties of signals by obtaining more local IA and IP estimates. The CPT models a signal's local trajectory in the phase-plane as an arc of a circle. The circle center provides a new reference point for calculating the IP and IA, thereby acting as an adaptive demodulation.
 
 For smooth and continuous oscillatory signals, the local (infinitesimally small) phase-plane trajectory can be accurately described by the arc of a circle. For this class of signal, we can think of the IF as the reciprocal of the time taken to complete the circular orbit at its current rate of change and trajectory (following the arc) in the phase-plane. In other words, it is the best estimate of the instantaneous frequency, since a sinusoid is a circle in the phase-plane. Fourier analysis measures the correlation of the signal in the phase-plane to trajectories of unit circles with a harmonically-related set of frequencies. The CPT estimates circle parameters (radius and center), allowing them to vary at each time sample, thus establishing a basis that is adaptive. In this way, a general platform to establish the notion of IA, IP and IF is provided.
 
@@ -249,7 +272,7 @@ where $\eta \in \mathbb{R}$ is a small constant. Equations~\ref{eq:IADef}, \ref{
 % \end{equation}
 % This test signal was chosen since it was used as an example in~\cite{Huang2008} for demonstrating problems of having non-quadrature Hilbert transforms, which results in an underestimate of the IF when using the HHT. The DQ method and the CPT both provide very good IF estimates. The HHT IF estimates are inaccurate due to having a non-quadrature analytic signal for the IMF. The DQ method overcomes the limitations described in the Nuttall theorem via normalizing the IMFs prior to computing the analytic signal. The CPT overcomes the limitations of the Nuttall theorem by enforcing a circular structure in the phase-plane. The DQ method has some minor problems in estimating the IF at points corresponding to extrema of the time-series. This is a consequence of the normalization procedure. 
 % ~~~~~~~~~~~~~~~
-Modeling the signal trajectory as an arc of a circle in the phase-plane enables the inclusion of a disturbance term, allowing for noise to be accounted for and dealt with in a consistent manner. \dean{Further more Rau Cramer lower bound...} In addition, since the CPT does not rely on an iterative sifting procedure, meaningful IA estimates are obtained.
+Modeling the signal trajectory as an arc of a circle in the phase-plane enables the inclusion of a disturbance term, allowing for noise to be accounted for and dealt with in a consistent manner. In addition, since the CPT does not rely on an iterative sifting procedure, meaningful IA estimates are obtained.
 
 % advantage of the CPT method over the HHT is that it does not rely on the sifting process, allowing for inflections to be handled in a more consistent manner. Another 
 
@@ -265,8 +288,8 @@ Modeling the signal trajectory as an arc of a circle in the phase-plane enables 
 
 \section{Computing the CPT}\label{sect:ComputingCPTSection}
 
-The steps of the CPT algorithm are presented in Algorithm~\ref{CPTAlgorithm}. The Circular Phase Transform is principally a circle fitting procedure. After computing the Hilbert transform of the signal to get a phase-plane representation, the algorithm consists of three steps for each sample in the time series. 
-The first step, described in Section~\ref{sect:FindingArc}, is to find a set of points around the each sample to specify an arc of a set length (where the arc length is defined by an angle) in the phase-plane representation. The second step, described in Section~\ref{}, is to fit a circle to each arc, which yields an estimate for the IA and offset for each sample in the time series. These values are then used the compute the IP. The third step, described in Section~\ref{sect:DetectingInvalidParameters}, checks the validity of the estimated parameters using prior knowledge of the data structure, i.e. the phase is monotonically increasing in time (except at $2\pi$ phase transitions) and the phase-plane trajectory will form closed arcs so the offset is always on one side. After unwrapping the valid IP estimates, the invalid parameters are rejected and recovered via interpolation. 
+The steps of the CPT algorithm are presented in Algorithm~\ref{CPTAlgorithm}. The CPT is principally a circle fitting procedure. After computing the Hilbert transform of the signal to get a phase-plane representation, the algorithm consists of three steps for each sample in the time series. 
+The first step, described in Section~\ref{sect:FindingArc}, is to find a set of points around the each sample to specify an arc of a set length (where the arc length is defined by an angle). The second step, described in Section~\ref{sect:CircleFittingProcedure}, is to fit a circle to each arc, which yields an estimate for the IA and offset for each sample in the time series. These values are used the compute the IP. The third step, described in Section~\ref{sect:DetectingInvalidParameters}, checks the validity of the estimated parameters using prior knowledge of the data structure. Three checks are used, where the first check ensures monotonicity of the IP estimates (except at $2\pi$ phase transitions), the second check ensures the IA estimate is bounded by maximum amplitude of the signal, and the final check ensures the estimated circle center (or offset) is on the correct side of the arc. After rejecting invalid parameter estimates, the IP is unwrapped. Following this, the IF is estimated. Then the invalid parameter are recovered via interpolation. 
 
 \begin{algorithm}
 \caption{The Circular Phase Transform}\label{CPTAlgorithm}
@@ -286,18 +309,26 @@ The first step, described in Section~\ref{sect:FindingArc}, is to find a set of 
 \State check validity of IP estimate using Eqs.~\ref{eq:Prior1} and \ref{eq:Prior2}
 \State reject invalid parameters estimates
 \State unwrap IP estimates
+\State estimate IF
 \State recover rejected parameters via interpolation 
 \end{algorithmic}
 \end{algorithm}
 
 \subsection{Determining the Arcs for the Circle Fits}\label{sect:FindingArc}
-The number of points in an arc length specified by the angle $\psi$ about a point of interest depends on the sampling rate and the frequency content of the data. The arc length is assumed to be unknown and to vary throughout the time series, therefore, $\psi$ must be found empirically.
+In this section we describe how the arcs that are used to fit the circles are formed. The set of samples in an arc length specified by the angle $\psi$ about a sample of interest depends on the sampling rate and the frequency content of the data. The set of samples that specify the arc is assumed to be unknown and to vary throughout the time series, therefore, must be found empirically.
 
-To show how the arc is formed, we will first consider a noise-free sinusoid of unknown frequency. The sample of interest in the phase-plane representation of the signal can be described in vector form as
+\begin{figure}[h]
+	\centering
+		\includegraphics[scale=1]{./Figures/eps/SetArcLengthDemo.eps}
+	\caption{Graphical description of the method to find the arc that is used to fit the circle and the method to find the points that are used to estimate the tangent to the arc. The sinusoidal signal is depicted as the dashed line, forming the circle in the phase-plane. The point of interest, $\mathbf{p}(n)$, is shown by the blue plus symbol. The arc that is used to fit the circle is shown by the red line. The points that mark the leading and trailing edges of the arc, $\mathbf{p}(n+f)$ and $\mathbf{p}(n-b)$, are shown by the red x and * markers, respectively. The angle $\theta$ that between the lines shown in blue is used to find the specified arc length described by the angle $\psi$. The points that are used to estimate the tangent, $p(n+f_t)$ and $p(n-b_t)$ are shown by the triangles pointing left and right respectively. These points are selected using the angle $\gamma$, between the black dashed lines.}
+	\label{fig:SetArcLengthDemo}
+\end{figure}
+
+To show how the arc is formed, we will first consider a noise-free sinusoid of unknown frequency. A graphical description is provided in Figure~\ref{fig:SetArcLengthDemo}. The sample of interest in the phase-plane representation of the signal can be described in vector form as
 \begin{equation}
 	\mathbf{p}_y(n) = \left[y\left(n\right),\mathcal{H}y\left(n\right)\right]^{\top}.
 \end{equation}
-The arc used to fit the circle for this point is described by the set of consecutive neighboring points
+The arc used to fit the circle corresponding to this sample is described by the set of consecutive neighboring points
 \begin{equation}
 	\mathbf{P}_y(n) = \left[\mathbf{p}_y(n-b),\hdots,\mathbf{p}_y(n),\hdots,\mathbf{p}_y(n+f)\right],
 \end{equation}
@@ -323,10 +354,6 @@ If $\|\mathbf{p}_f(n)\| < \|\mathbf{p}_b(n)\|$, then $f$ is incremented, otherwi
 Now consider a noisy sinusoid. In this case the measured arc length, $\hat\psi$, may sporadically increase above the desired arc length, $\psi$, due to fluctuations from the disturbance. Therefore, in our implementation we require $\hat\psi$ to be greater than $\psi$ for multiple consecutive samples. This number of samples is a free parameter that depends on the sampling rate and the SNR of the time series. 
 
 Now consider a more complex time series with inflections. In this case, the problem of finding a specified arc length becomes more complicated as inflections in a time series are cusps in the phase-plane representation. At the point of a cusp, the phase-plane trajectory does not follow an arc of a circle. Therefore, the arc used to fit the circle should not be spanning a cusp and the specified arc length, $\psi$, will not be achievable. Nevertheless, a shorter arc length not spanning the cusp may still provide a good circle fit. For this scenario, $\theta$ is not necessarily monotonically decreasing as $b$ or $f$ is incremented. In the noise-free case, cusps can be detected by checking for increases in $\theta$ as $b$ or $f$ is incremented. However, if a high level of noise is present, cusps become hard to discern. For low-noise signals, cusps can be detected if $\theta$ becomes larger when $b$ or $f$ are incremented. The cusp detection threshold will be signal-dependant, thus is a  parameter to be set by the user. If a cusp is detected, then the arc will be chosen such that it does not cross the cusp.
- 
-
- 
-
 
 % The algorithm fits circles to segments of data (using a sliding window) allowing for different  arc lengths at each sample, by fitting circles to a range of candidate segment lengths and selecting the best one. The concavity of the arc is checked for by ensuring that the fitted circle center is on the correct side or the arc; this is done by estimating the tangent, and thereby the normal, vector. In addition, the IP corresponding to the the candidate circles is checked, making sure the IP is monotonically increasing in time. The best circle fit (according to our criteria) is selected from the valid candidates (with varying arc lengths) and the corresponding parameters are used to describe the instantaneous properties of the signal. Finally, missing data points that did not satisfy the criteria inserted by interpolation.
 
@@ -404,7 +431,7 @@ At a $2\pi$ phase transition, the maximum phase decrement in radians is
 \end{equation}
 where $\alpha$ is a negative number. Following this, the phase evolution at $2\pi$ transitions should also satisfy
 \begin{equation}\label{eq:Prior2}
-(\hat{\phi} \left( n \right)+pi) - (\hat{\phi} \left( n-1\right)+pi) \le \alpha, 
+(\hat{\phi} \left( n \right)+\pi) - (\hat{\phi} \left( n-1\right)+\pi) \le \alpha, 
 \end{equation}
 where is $\pi$ is added to both terms so they are positive.
 
@@ -721,6 +748,9 @@ The brain's rhythms have specific oscillatory bands that are associated with var
 % \end{figure}
 
 \section{Discussion}\label{sect:DiscussionSection}
+
+\dean{Further more Rau Cramer lower bound...}
+
 We have presented a new method for estimation of instantaneous properties of nonstationary signals. The novelty in our method is in the demodulation of the signal in the phase-plane. Demodulating in the phase-plane has advantages over methods in the time domain such as, 
 \begin{itemize}
     \item circle fitting is easier than fitting sinusoids (fewer parameters to find),
