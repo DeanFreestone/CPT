@@ -1,4 +1,27 @@
-function [foundarc phi phi_unwrapped r t firstindex lastindex ArcPoints TangentPoints] = CPTfunction(y, t, Ts, psi, f_max,init_b_f,zeta)
+% y
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% the signal
+
+% Ts
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% the sampling period of the signal
+
+% f_max
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% the maximum frequency of interest in the signal
+
+% init_b_f
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% the number of samples forward or backward from the sample of
+% interest to start search for the arc length
+
+% zeta
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% the step size in searching for an arc. the increment in b or f
+% if the cpt is used in an emd than it is handy to make zeta bigger for
+% slower time scales
+
+function [x0 Hx0 foundarc phi phi_unwrapped r t firstindex lastindex ArcPoints TangentPoints] = CPTfunction(y, t, Ts, psi, f_max,init_b_f,zeta)
 
 % ploton = true;
 ploton = false;
@@ -25,7 +48,7 @@ SampleThreshold = 2/Ts;
 
 SampleForwardBackFlag = false;              % if the number of sample to fit arc gets too big, change flag
 
-init_b = init_b_f;     
+init_b = init_b_f;                      % the number of samples from the point of interest to fit the arc
 init_f = init_b_f;      
 
 % cycle through all samples to find circle fits
@@ -35,7 +58,7 @@ for n=init_b(1)+1:NSamples - init_f(1)-zeta
         flag = false;                                                                   % initialize / reset arc length indicator flag, this flag tells us when to get out of the while loop below
     end
     
-    P_yn = P_y(:,n);                                                            % point of interest where we want to fit the circle
+    P_yn = P_y(:,n);                            % point of interest where we want to fit the circle
     
     % now there is no guarantee for the emd that the n-b or n+f will be in
     % the data range because the signal gets shorter with each step of the
@@ -71,29 +94,34 @@ for n=init_b(1)+1:NSamples - init_f(1)-zeta
     CuspCounter = 0;
     
     % we go through this only on the first time through
-    p_b = P_y(:,n-b) - P_yn;
-    p_f = P_y(:,n+f) - P_yn;
-    
-    theta = acos(dot(p_f,p_b) / (norm(p_b)*norm(p_f)));
+    p_b = P_y(:,n-b) - P_yn;                    % vector from the sample of interest to back edge of arc
+    p_f = P_y(:,n+f) - P_yn;                    % vector from sample of interest to lead edge of arc
+
+    % these distances will decide if we increment b or f.
+    DistBack = norm(p_b);            % Euclidean distance between center and back edge of arc
+    DistForward = norm(p_f);      % Euclidean distance between center and forward edge of arc
+        
+    % initialize the calculation for theta and psi
+    theta = acos(dot(p_f,p_b) / (DistBack*DistForward));         % angle between p_b and p_f
     psi_hat = 2*(pi - theta);                               % estimated arc length
             
     % cycle through various arc lengths until the arc angle is correct
+    % indicated by a true flag
     while flag ~= true
                
         if (b > n) || (n+f > NSamples)
-            disp('error')                           % for checking
+            disp('error')                           % for checking, make sure we dont go over edge of time series
         end
         
-        % these distances will decide if we increment b or f.
-        DistBack = norm(P_yn - P_y(:,n-b));            % Euclidean distance between center and back edge of arc
-        DistForward = norm(P_yn - P_y(:,n+f));      % Euclidean distance between center and forward edge of arc
-        
+
+        % check if the 
         if DistBack <= DistForward
 
             if n-round(b+zeta) > 0                         % make sure we don't go into negative indexes
 
-                b = round(b + zeta); 
+                b = round(b + zeta);                        % increment the distance back
                 p_b = P_y(:,n-b) - P_yn;
+                DistBack = norm(p_b);            % Euclidean distance between center and back edge of arc
 
             else                                         % we are at the edge of the time series so we need to stop
 
@@ -113,6 +141,7 @@ for n=init_b(1)+1:NSamples - init_f(1)-zeta
 
                 f = round(f + zeta);
                 p_f = P_y(:,n+f) - P_yn;
+                DistForward = norm(p_f);      % Euclidean distance between center and forward edge of arc
 
             else
 
@@ -129,7 +158,7 @@ for n=init_b(1)+1:NSamples - init_f(1)-zeta
             
         % find angle between points at the edge of the arc
         theta_previous = theta;
-        theta = acos(dot(p_f,p_b) / (norm(p_b)*norm(p_f)));
+        theta = acos(dot(p_f,p_b) / (DistBack*DistForward));
         psi_hat = 2*(pi - theta);                               % estimated arc length
                 
         % check for cusps
@@ -152,13 +181,17 @@ for n=init_b(1)+1:NSamples - init_f(1)-zeta
         else
             CuspCounter = 0;                    % reset cusp counter
         end
+        % ~~~~~~~~~~~~
         
         % check for tangent
-        % ~~~~~~~~~~~
+        % ^^^^^^^^^^^
         if psi_hat >= pi
             
             % then it might be the right points for the tangent
-            
+
+            % we set the final value when psi_hat is initially greater than
+            % pi, because we want to be as close to the threshold as
+            % possible
             if TangentCounter == 0
                 b_t_final = b;
                 f_t_final = f;
@@ -184,9 +217,11 @@ for n=init_b(1)+1:NSamples - init_f(1)-zeta
             TangentCounter = 0;
             
         end
-
+        % ^^^^^^^^^^^^^^^^^^
+        
+        
         % here we check if the arc length
-        % ~~~~~~~~~~~~~~~~~~~
+        % -----------------------------------
         if (psi_hat > psi) % || (theta_diff > theta_diff_thresh)
             
             if ArcCounter == 0
@@ -216,18 +251,21 @@ for n=init_b(1)+1:NSamples - init_f(1)-zeta
             ArcCounter = 0;
             
         end
-                
+        % -------------------------------   
+        
         % if b or f have gotten to big we want to stop.
         if (b > SampleThreshold) || (f > SampleThreshold)           
-            SampleForwardBackFlag = true;
+            SampleForwardBackFlag = true;                           % this is an output
             flag = true;
         end
         
     end
     
+    % now we have found the points that mark the arc and the tangent
     TangentPoints(:,n) = [b_t_final ; f_t_final];
     ArcPoints(:,n) = [b_final ; f_final];
 
+    % this is the segment used to fit the circle!
     y_s = y( n-ArcPoints(1,n) : n+ArcPoints(2,n) );
     Hy_s = Hy( n-ArcPoints(1,n) : n+ArcPoints(2,n) );
 
@@ -250,7 +288,9 @@ for n=init_b(1)+1:NSamples - init_f(1)-zeta
 
 end
 
+% find our estimates if the b or f has not become too large
 if ~SampleForwardBackFlag
+    
     phi_temp = atan2(Hy-Hx0, y-x0);
     x_temp = r_temp.*cos(phi_temp);
     Hx_temp = r_temp.*sin(phi_temp);
@@ -284,7 +324,8 @@ if ~SampleForwardBackFlag
     phi(IndexesForNan) = nan;
     r(IndexesForNan) = nan;
     
-%     ~~~~~~~~~~~~~~~~~
+    % this next part checks the phase progression
+    % ~~~~~~~~~~~~~~~~~~~~~~~~~~
     rho = 1/(Ts*2*f_max);           % this is the over sampling parameters
     p = 1;    
     beta_p = p*pi / rho;
@@ -295,11 +336,6 @@ if ~SampleForwardBackFlag
     % detect the invalid phase changes, find indexes for incorrect phase
     % transition
     PhaseIncIndexes = ~(( (delta_phi > 0) & (delta_phi < 2*beta_p) ) | (delta_phi < alpha_p));
-
-    % we don't know if it was the later or earlier phase estimate that was
-    % know so we set them both to nan.
-%     temp = [PhaseIncIndexes(2:end) false];
-%     PhaseIncIndexes = PhaseIncIndexes | temp;
     
     phi(PhaseIncIndexes) = nan; 
     x(PhaseIncIndexes) = nan;
@@ -311,16 +347,17 @@ if ~SampleForwardBackFlag
     % find the first IP estimate that is not nan
     first_good_index = find(~isnan(phi),1,'first');
     phi_previous = phi(first_good_index);
-    rho = 1/(Ts*2*f_max);           % this is the over sampling parameters
     p = 1;
     for n=first_good_index+1:length(phi)
         phi_current = phi(n);
         if isnan(phi_current)
             p=p+1;
         else
+            
             beta_p = p*pi / rho;
             alpha_p = 2*beta_p - 2*pi;
             delta_phi = phi_current - phi_previous;
+            
             if ~(( (delta_phi > 0) && (delta_phi < 2*beta_p) ) || (delta_phi < alpha_p))
                 phi(n) = nan;
                 r(n) = nan;
@@ -334,39 +371,39 @@ if ~SampleForwardBackFlag
         end
     end
 
-    if ploton
-        figure
-        PlotLim = 1.5*max(y);
-        MS = 20;
-        for n=b_init(1)+1:NSamples-f_init(1)-1
-
-            y_s = y(n-ArcPoints(1,n):n+ArcPoints(2,n));
-            Hy_s = Hy(n-ArcPoints(1,n):n+ArcPoints(2,n));
-            plot(y_s,Hy_s,'ko-')
-            hold on
-            x_s_temp = x_temp(n-ArcPoints(1,n):n+ArcPoints(2,n));
-            Hx_s_temp = Hx_temp(n-ArcPoints(1,n):n+ArcPoints(2,n));
-            plot(x_s_temp,Hx_s_temp,'o-')
-
-            x_s = x(n-ArcPoints(1,n):n+ArcPoints(2,n));
-            Hx_s = Hx(n-ArcPoints(1,n):n+ArcPoints(2,n));
-            plot(x_s,Hx_s,'g.-')
-
-            plot(x0(n),Hx0(n),'*')
-
-            plot(y(n),Hy(n),'xr','markersize',MS)
-
-            plot([0 Tangent(1,n)],[0 Tangent(2,n)])
-            plot([0 a(1,n)],[0 a(2,n)],'r')
-
-            hold off
-            xlim([-PlotLim PlotLim])
-            ylim([-PlotLim PlotLim])
-%             pause(0.05)
-            drawnow
-
-        end
-    end
+%     if ploton
+%         figure
+%         PlotLim = 1.5*max(y);
+%         MS = 20;
+%         for n=b_init(1)+1:NSamples-f_init(1)-1
+% 
+%             y_s = y(n-ArcPoints(1,n):n+ArcPoints(2,n));
+%             Hy_s = Hy(n-ArcPoints(1,n):n+ArcPoints(2,n));
+%             plot(y_s,Hy_s,'ko-')
+%             hold on
+%             x_s_temp = x_temp(n-ArcPoints(1,n):n+ArcPoints(2,n));
+%             Hx_s_temp = Hx_temp(n-ArcPoints(1,n):n+ArcPoints(2,n));
+%             plot(x_s_temp,Hx_s_temp,'o-')
+% 
+%             x_s = x(n-ArcPoints(1,n):n+ArcPoints(2,n));
+%             Hx_s = Hx(n-ArcPoints(1,n):n+ArcPoints(2,n));
+%             plot(x_s,Hx_s,'g.-')
+% 
+%             plot(x0(n),Hx0(n),'*')
+% 
+%             plot(y(n),Hy(n),'xr','markersize',MS)
+% 
+%             plot([0 Tangent(1,n)],[0 Tangent(2,n)])
+%             plot([0 a(1,n)],[0 a(2,n)],'r')
+% 
+%             hold off
+%             xlim([-PlotLim PlotLim])
+%             ylim([-PlotLim PlotLim])
+% %             pause(0.05)
+%             drawnow
+% 
+%         end
+%     end
     % unwrap phase
     phi_unwrapped = unwrap_phi(phi) - pi;
 
@@ -378,6 +415,10 @@ else
     phi_unwrapped = zeros(1,length(phi));
     pause
 end
-ArcPoints = ArcPoints(:,firstindex:lastindex);
-TangentPoints = TangentPoints(:,firstindex:lastindex);
-phi_unwrapped = phi_unwrapped(firstindex:lastindex);
+
+% ArcPoints = ArcPoints(:,firstindex:lastindex);
+% TangentPoints = TangentPoints(:,firstindex:lastindex);
+% phi_unwrapped = phi_unwrapped(firstindex:lastindex);
+% x0 = x0(firstindex:lastindex);
+% Hx0 = Hx0(firstindex:lastindex);
+

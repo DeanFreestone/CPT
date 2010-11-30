@@ -38,30 +38,30 @@ y = x1 + x2;
 % ~~~~~~~~~~~~~~~~~~~
 % ~~~~~~~~~~~~~~~~~~~
 % ~~~~~~~~~~~~~~~~~~~
-
-% load CSGridDepth200608CS33_19900_Chs_1_48_200s
-
-load HGSP7_98s_seizure
-Fs = 4069.010498046875;     % Hz
-Ts = 1/Fs;
-
-% pick channel
-x = detrend(Data(1:end-round(Fs*2),end) - Data(1:end-round(2*Fs),end-1));
-% x = detrend(Data(:,end-1));
-NSamples = length(x);
-t{1} = 0:Ts:(length(x)-1)/Fs;        % seconds
-
-clear data
-
-% use a median filter to give the data a first clean
-x = medfilt1(x,20);
-
-% low pass filter file at 40 Hz
-Fc = [2 65];                                % Hz
-f_max = 200;
-Wc = Fc/(Fs/2);                     % normalised digital frequency
-[b a] = butter(2,Wc);
-y = filtfilt(b,a,x)';
+% 
+% % load CSGridDepth200608CS33_19900_Chs_1_48_200s
+% 
+% load HGSP7_98s_seizure
+% Fs = 4069.010498046875;     % Hz
+% Ts = 1/Fs;
+% 
+% % pick channel
+% x = detrend(Data(1:end-round(Fs*2),end) - Data(1:end-round(2*Fs),end-1));
+% % x = detrend(Data(:,end-1));
+% NSamples = length(x);
+% t{1} = 0:Ts:(length(x)-1)/Fs;        % seconds
+% 
+% clear data
+% 
+% % use a median filter to give the data a first clean
+% x = medfilt1(x,20);
+% 
+% % low pass filter file at 40 Hz
+% Fc = [2 65];                                % Hz
+% f_max = 200;
+% Wc = Fc/(Fs/2);                     % normalised digital frequency
+% [b a] = butter(2,Wc);
+% y = filtfilt(b,a,x)';
 
 % ~~~~~~~~~~~~~~~~~~~
 % ~~~~~~~~~~~~~~~~~~~
@@ -113,12 +113,12 @@ while foundarc
             else
                 max_index = p1(end);
             end
+            
             spline_index = min_index:max_index;
 
             if length(spline_index) < 2
                 foundarc  = false;
             else
-                
                 
                 maxima = res{m};
                 maxima = maxima(p1);
