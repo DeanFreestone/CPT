@@ -20,11 +20,11 @@
 
 \author{Dean~R.~Freestone,~\IEEEmembership{Graduate Student Member,~IEEE,}
 		David~B.~Grayden,~\IEEEmembership{Member,~IEEE,}
-        Alan~Lai
+        Alan~Lai,
         Levin~Kuhlman,~\IEEEmembership{Member,~IEEE,}
-        Timothy~S.~Nelson
-        Mark~J.~Cook,~\IEEEmembership{Member,~IEEE,}
-        and Anthony~N.~Burkitt,~\IEEEmembership{Senior Member,~IEEE,}
+        Timothy~S.~Nelson,
+        Mark~J.~Cook,
+        and Anthony~N.~Burkitt,~\IEEEmembership{Senior Member,~IEEE.}
         
 
 \thanks{D.\ R.\ Freestone is with the Department
@@ -33,7 +33,7 @@ of Electrical and Electronic Engineering, University of Melbourne, VIC 3010, Aus
 \thanks{A.\ Lai is with The Bionic Ear Institute, 384-388 Albert Street, East Melbourne, VIC 3002, Australia}
 \thanks{L.\ Kulhman is with the Department of Electrical and Electronic Engineering, University of Melbourne, VIC 3010, Australia}
 \thanks{T.\ S.\ Nelson is with The Bionic Ear Institute, 384-388 Albert Street, East Melbourne, VIC 3002, Australia}
-\thanks{M.\ J.\ Cook...}
+\thanks{M.\ J.\ Cook is with the Department of Clinical Neurology, St. Vincent's Hospital, Fitzroy, VIC 3065, Australia}
 \thanks{A.\ N.\ Burkitt is with the Department of Electrical and Electronic Engineering, University of Melbourne, VIC 3010, Australia, and The Bionic Ear Institute, 384-388 Albert Street, East Melbourne, VIC 3002, Australia}
 
 
@@ -59,7 +59,7 @@ Time-frequency analysis, nonlinear signal processing, Hilbert-Huang transform.
 \IEEEpeerreviewmaketitle
 
 \section{Introduction}
-\IEEEPARstart{T}{he} concept of instantaneous frequency (IF) may seem an oxymoron. If frequency is defined as the number of repeating events per unit time, then it is difficult to conceptualize it as an instantaneous quantity. However, the IF should simply be considered the best estimate of the Fourier frequency (by Fourier frequency we refer to a sinusoidal basis) given an infinitesimally small segment of a signal. For smooth and continuous oscillatory signals the IF can be thought of as an extension to the Fourier frequency, where frequency is estimated using the rate of change of the instantaneous phase (IP), and the phase is defined as the entire argument of a cosine or sine function. In the case of a stationary sinusoid the IP is increasing at a constant rate and the IF is equivalent to the Fourier frequency. In general, the derivative of the instantaneous phase (IP) is the best estimate of the frequency at any point in time. By defining the IF as the derivative of the IP, time-frequency properties of nonstationary, frequency modulated signals, such as chirps, can be estimated. For example, if one was interested in studying sea level fluctuations at a point within a swell, then the IF of the sea level measurements would describe the process. 
+\IEEEPARstart{T}{he} concept of instantaneous frequency (IF) may seem an oxymoron. If frequency is defined as the number of repeating events per unit time, then it is difficult to conceptualize it as an instantaneous entity. However, the IF should simply be considered the best estimate of the Fourier frequency (by Fourier frequency we refer to a sinusoidal basis) given an infinitesimally small segment of a signal. For smooth and continuous oscillatory signals the IF can be thought of as an extension to the Fourier frequency, where frequency is estimated using the rate of change of the instantaneous phase (IP), and the phase is defined as the entire argument of a cosine or sine function. In the case of a stationary sinusoid the IP is increasing at a constant rate and the IF is equivalent to the Fourier frequency. In general, the derivative of the instantaneous phase (IP) is the best estimate of the frequency at any point in time. By defining the IF as the derivative of the IP, time-frequency properties of nonstationary, frequency modulated signals, such as chirps, can be estimated. For example, if one was interested in studying sea level fluctuations at a point within a swell, then the IF of the sea level measurements would describe the process. 
 
 To demonstrate the procedure for calculating instantaneous amplitude (IA), instantaneous phase (IP), and instantaneous frequency (IF), we first consider a signal where all oscillations are centered at the origin described by
 \begin{equation}
@@ -197,7 +197,7 @@ A problem with the standard EMD is that it cannot deal with noise or disturbance
 		\includegraphics[scale=1]{./Figures/eps/HHTDemoIteration5.eps}
 	\label{fig:label5}}
 	\label{fig:HHTDemo}
-	\caption{Illustration of the sifting procedure of the HHT for extracting the first IMF of the EMD for the test signal from Eq.~\ref{eq:FirstTestSig}. Each subfigure shows an iteration of the sifting procedure. a) The solid black line shows the original signal. The blue dot markers show the local maxima. The blue line show a cubic spline interpolation through the local maxima. The red dot markers show the local minima. The red line is a cubic spline interpolation through the local minima. The cyan line is the average of the splines, forming an adaptive trend. b) The first iteration of the sifting algorithm. The solid black line is now the signal that has been detrended by the adaptive trend of the original signal. c)-e) The second, third and forth iteration of the sifting algorithm, where the signal was further detrended using the adaptive trend of the previous iterations.}
+	\caption{Illustration of the sifting procedure of the HHT for extracting the first IMF of the EMD for the test signal from Eq.~\ref{eq:FirstTestSig}. Each subfigure shows an iteration of the sifting procedure. a) The solid black line shows the original signal. The blue dot markers show the local maxima. The blue line show a cubic spline interpolation through the local maxima. The red dot markers show the local minima. The red line is a cubic spline interpolation through the local minima. The cyan line is the average of the splines, forming an adaptive trend. b) The first iteration of the sifting algorithm. The solid black line is now the signal that has been detrended by the adaptive trend of the original signal. c)-e) The second, third and fourth iteration of the sifting algorithm, where the signal was further detrended using the adaptive trend of the previous iterations.}
 \end{figure}
 
 % \begin{figure}
@@ -234,14 +234,14 @@ For smooth and continuous oscillatory signals, the local (infinitesimally small)
 
 With sufficient sampling and signal-to-noise ratio, the instantaneous properties described by an arc may be estimated from a discrete time series using circle fitting methods. The uniqueness of the phase-plane representation of a signal is guaranteed if the conditions of the Bedrosian theorem~\cite{Bedrosian1963} are met, and the uniqueness of the IA and IP estimates are inherent in circle fitting methods. In addition, the locally circular representation of the phase-plane trajectory enforces a quadrature structure on the analytic representation of the signal. (\dean{does this address issues associated with the Nutall theorem?})
 
-The CPT requires the signal to satisfy three conditions in addition to the condition stated by the Bedrosian theorem (Eq.~\ref{eq:BedrosianCondition}). The signal must be 1) smooth and continuous, 2) oscillatory, and 3) mono-component. The third condition allows for physical interpretation of the CPT. A common way to define a signal as being mono-component is to use a particular basis and time scale as a reference~\cite{Boashash1992,Cohen1995}. This definition is not appropriate here, since we are dealing with instantaneous quantities, where time scales maybe continuously changing and the basis is arbitrary. Therefore, we define a signal as being mono-component if it can be sufficiently described by a scalar quantity when it is sampled from a vector field. \dean{Might remove: For example, when considering sea level measurement, the signal is mono-component if the surface of the sea beneath the measurement sensor is uniform in height (or can be approximated by an average). This condition does not restrict the generator of a signal to a single source. Sea level will be affected by waves from all directions but, if the measurement is descriptive of the process at a single point in space, we can consider it mono-component.} Together, the conditions ensure the signal has an oscillatory component that has a phase that is monotonically increasing in time (except at $2\pi$ transitions) and a smooth closed trajectory in the phase-plane. 
+The CPT requires the signal to satisfy three conditions in addition to the condition stated by the Bedrosian theorem (Eq.~\ref{eq:BedrosianCondition}). The signal must be 1) smooth and continuous, 2) oscillatory, and 3) mono-component. The third condition allows for physical interpretation of the CPT. A common way to define a signal as being mono-component is to use a particular basis and time scale as a reference~\cite{Boashash1992,Cohen1995}. This definition is not appropriate here, since we are dealing with instantaneous quantities, where time-scales may be continuously changing and the basis is arbitrary. Therefore, we define a signal as being mono-component if it can be sufficiently described by a scalar quantity when it is sampled from a vector field. \dean{Might remove: For example, when considering sea level measurement, the signal is mono-component if the surface of the sea beneath the measurement sensor is uniform in height (or can be approximated by an average). This condition does not restrict the generator of a signal to a single source. Sea level will be affected by waves from all directions but, if the measurement is descriptive of the process at a single point in space, we can consider it mono-component.} Together, the conditions ensure the signal has an oscillatory component that has a phase that is monotonically increasing in time (except at $2\pi$ transitions) and a smooth closed trajectory in the phase-plane. 
 
 Under our standing assumptions, the analytic signal in the phase-plane can be modeled as
 \begin{align}\label{eq:SignalModel}
 y\left( t \right) &= x\left( t \right) + x_0\left( t \right) + \varepsilon \left( t \right) \\
 \mathcal{H}y\left( t \right) &= \mathcal{H}(x\left( t \right) + x_0\left( t \right) + \varepsilon \left( t \right)),
 \end{align}
-where $x(t) \in \mathbb{R}^1$ is an oscillatory component, $x_0(t) \in \mathbb{R}^1$ denotes an offset (or adaptive trend which may be oscillating on a slower time-scale than $x(t)$), and $\varepsilon(t) \sim \mathcal{N}(0,\sigma^2)$ represents process or measurement noise. \dean{We need to show that (or provide a reference):} Note that if $\varepsilon(t) \sim \mathcal{N}(0,\sigma^2)$ is a white noise process than it follows that $\mathcal{H}\varepsilon(t) \sim \mathcal{N}(0,\sigma^2)$ and that $\mathcal{H}\varepsilon(t)$ is also temporally white. 
+where $x(t) \in \mathbb{R}^1$ is an oscillatory component, $x_0(t) \in \mathbb{R}^1$ denotes an offset (or adaptive trend which may be oscillating on a slower time-scale than $x(t)$), and $\varepsilon(t) \sim \mathcal{N}(0,\sigma^2)$ represents process or measurement noise. \dean{We need to show that (or provide a reference):} Note that if $\varepsilon(t) \sim \mathcal{N}(0,\sigma^2)$ is a white noise process then it follows that $\mathcal{H}\varepsilon(t) \sim \mathcal{N}(0,\sigma^2)$ and that $\mathcal{H}\varepsilon(t)$ is also temporally white. 
 % Note, it is easy to show that the means are the same. Not 100\% on showing
 % \begin{equation}
 % 	\sigma^2 = \mathbb{E}[\left(\mathcal{H}\varepsilon(t)\right)^2].
@@ -269,7 +269,7 @@ Naturally, it follows that for a small finite time interval, $\Delta t$, we have
 \begin{equation}\label{eq:IA_small_time_interval}
     r(t)-r(t-\Delta t) < \eta,
 \end{equation}
-where $\eta \in \mathbb{R}$ is a small constant. Equations~\ref{eq:IADef}, \ref{eq:IAlimitingCase}, and \ref{eq:IA_small_time_interval} simply state that, given a sufficiently small segment of data the local oscillatory component, $x(t)$, can be approximated by an arc of a circle in the phase-plane or, equivalently, a sinusoid in the time domain. In the noise-free case, the IP of $x(t)$ is
+where $\eta \in \mathbb{R}$ is a small constant. Eqs.~\ref{eq:IADef}, \ref{eq:IAlimitingCase}, and \ref{eq:IA_small_time_interval} simply state that, given a sufficiently small segment of data the local oscillatory component, $x(t)$, can be approximated by an arc of a circle in the phase-plane or, equivalently, a sinusoid in the time domain. In the noise-free case, the IP of $x(t)$ is
 \begin{equation}\label{IPdef}
     \phi \left( t \right) = \arctan \left( \frac{\mathcal{H}x\left( t \right)}
     {x\left( t \right)} \right).
@@ -298,7 +298,7 @@ Modeling the signal trajectory as an arc of a circle in the phase-plane enables 
 
 \section{Computing the CPT}\label{sect:ComputingCPTSection}
 The steps of the CPT algorithm are presented in Algorithm~\ref{CPTAlgorithm}. The CPT is principally a circle fitting procedure. After computing the Hilbert transform of the signal to get a phase-plane representation, the algorithm consists of three steps for each sample in the time series. 
-The first step, described in Section~\ref{sect:FindingArc}, is to find a set of points around the each sample to specify an arc of a set length (where the arc length is defined by an angle). The second step, described in Section~\ref{sect:CircleFittingProcedure}, is to fit a circle to each arc, which yields an estimate for the IA and offset for each sample in the time series. These values are used the compute the IP. The third step, described in Section~\ref{sect:DetectingInvalidParameters}, checks the validity of the estimated parameters using prior knowledge of the data structure. Three checks are used, where the first check ensures monotonicity of the IP estimates (except at $2\pi$ phase transitions), the second check ensures the IA estimate is bounded by maximum amplitude of the signal, and the final check ensures the estimated circle center (or offset) is on the correct side of the arc. After rejecting invalid parameter estimates, the IP is unwrapped. Following this, the IF is estimated. Then the invalid parameter are recovered via interpolation. 
+The first step, described in Section~\ref{sect:FindingArc}, is to find a set of points around each sample to specify an arc of a set length (where the arc length is defined by an angle). The second step, described in Section~\ref{sect:CircleFittingProcedure}, is to fit a circle to each arc, which yields an estimate for the IA and offset for each sample in the time series. These values are used the compute the IP. The third step, described in Section~\ref{sect:DetectingInvalidParameters}, checks the validity of the estimated parameters using prior knowledge of the data structure. Three checks are used where, the first check ensures monotonicity of the IP estimates (except at $2\pi$ phase transitions), the second check ensures the IA estimate is bounded by maximum amplitude of the signal, and the final check ensures the estimated circle center (or offset) is on the correct side of the arc. After rejecting invalid parameter estimates, the IP is unwrapped. Following this, the IF is estimated. Then the invalid parameters are recovered via interpolation. 
 
 \begin{algorithm}
 \caption{The Circular Phase Transform}\label{CPTAlgorithm}
@@ -313,7 +313,7 @@ The first step, described in Section~\ref{sect:FindingArc}, is to find a set of 
 	\State get tangent estimate $\mathbf{g}(n)= \mathbf{p}_y(n + f_t) - \mathbf{p}_y(n - b_t)$
 \EndFor
 \State calculate $\hat\phi(n) = \arctan\left(\frac{\mathcal{H}(y(n) - \hat{x}_0(n))}{y(n) - \hat{x}_0(n)}\right)$
-\State check validity of circle center estimates using Eqs.~\ref{eq:IncorrectSideClassifier}
+\State check validity of circle center estimates using Eq.~\ref{eq:IncorrectSideClassifier}
 \State check validity of IA estimate using Eq.~\ref{eq:bound_on_IA_estimate} $\max y(t)$
 \State check validity of IP estimate using Eqs.~\ref{eq:Prior1} and \ref{eq:Prior2}
 \State reject invalid parameters estimates
@@ -329,7 +329,7 @@ In this section we describe how the arcs that are used to fit the circles are fo
 \begin{figure}[ht]
 	\centering
 		\includegraphics[scale=1]{./Figures/eps/SetArcLengthDemo.eps}
-	\caption{Graphical description of the method to find the arc that is used to fit the circle and the method to find the points that are used to estimate the tangent to the arc. The sinusoidal signal is depicted as the dashed line, forming the circle in the phase-plane. The point of interest, $\mathbf{p}(n)$, is shown by the blue plus symbol. The arc that is used to fit the circle is shown by the red line. The points that mark the leading and trailing edges of the arc, $\mathbf{p}(n+f)$ and $\mathbf{p}(n-b)$, are shown by the red x and * markers, respectively. The angle $\theta$ between the lines shown in blue is used to find the specified arc length described by the angle $\psi$. The points that are used to estimate the tangent, $p(n+f_t)$ and $p(n-b_t)$ are shown by the triangles pointing left and right respectively. These points are selected using the angle $\gamma$, between the black dashed lines.}
+	\caption{Graphical description of the method to find the arc that is used to fit the circle and the method to find the points that are used to estimate the tangent to the arc. The sinusoidal signal is depicted as the dashed line, forming the circle in the phase-plane. The point of interest, $\mathbf{p}(n)$, is shown by the blue plus symbol. The arc that is used to fit the circle is shown by the red line. The points that mark the leading and trailing edges of the arc, $\mathbf{p}(n+f)$ and $\mathbf{p}(n-b)$, are shown by the red x and * markers, respectively. The angle $\theta$ between the lines shown in blue is used to find the specified arc length described by the angle $\psi$. The points that are used to estimate the direction of the tangent to the arc, $p(n+f_t)$ and $p(n-b_t)$, are shown by the triangles pointing left and right respectively. These points are selected using the angle $\gamma$, between the black dashed lines. The normal to the tangent, $\mathbf{a}(n)$, is shown by the solid black line from the origin.}
 	\label{fig:SetArcLengthDemo}
 \end{figure}
 
@@ -391,7 +391,7 @@ where $f_1 = 7$ Hz, $f_2 = 12$ Hz, $a_1 = 1$ and $a_2=0.7$.
 	\subfigure[]{
 		\includegraphics[scale=1]{./Figures/eps/MappingDemo2.eps}	
 	\label{fig:subfiglabel2}}
-	\caption{Demonstration of the circular phase transform. a) Shows an example of the transform in the time domain. b) Shows an example of the transform in the phase plane. In both subfigures the time series, $y(n)$, is plotted in black and the extracted oscillatory component that was found using the CPT, $x(n)$, is plotted in red. The segment of the time series that is used to fit the circle to estimate the IA, IP and IF for the point shown by the + marker is shown by thicker black line. The point marked by the x on $x(n)$ corresponds to the point marker by + on $y(n)$. In b) the point corresponding to the fitted circle center or offset, $x_0(n)$, is shown by the black dot marker.}\label{fig:MappingDemo}
+	\caption{Demonstration of the circular phase transform. a) Shows an example of the transform in the time domain. b) Shows an example of the transform in the phase plane. In both subfigures the time series, $y(n)$, is plotted in black and the extracted oscillatory component that was found using the CPT, $x(n)$, is plotted in red. The segment of the time series that is used to fit the circle to estimate the IA, IP and IF for the point shown by the `x' marker is shown by thicker black line. The point marked by the `+' on $x(n)$ corresponds to the point marker by `x' on $y(n)$. In b) the point corresponding to the fitted circle center or offset, $x_0(n)$, is shown by the black dot marker.}\label{fig:MappingDemo}
 \end{figure}
 % 	The black vertical line highlights the current sample, or point of interest and the red points in the time series highlight the segment used to compute the CPT. b) The phase-plane representation of the signal $y(n)$ (in blue) and the transformed phase-plane representation (in green). Note how the cycloid of the original signal was mapped to enclose the origin. The red data points highlight the segment of data used to fit the circle. The open circle shows the current sample, or point of interest. The red cross shows the center of the fitted circle for the current mapping. The Fig. also show an estimated tangent and normal vector used to detect incorrect mappings. The distance between the black and blue stars reflect the relative distance mismatch (normalized).}
 % \end{figure}
@@ -412,7 +412,7 @@ where $f_t$ and $b_t$ specify the numbers of samples forward and backward, respe
 	\mathbf{p}_{bt} = \mathbf{p}_y(n) - \mathbf{p}_y(n - b_t),
 \end{align}
 where the angle is measured by
-\begin{equation}
+\begin{equation}\label{eq:TangentArcLength}
 	\gamma = \arccos\left(\frac{\langle\mathbf{p}_{bt}(n),\mathbf{p}_{ft}(n)\rangle}{\|\mathbf{p}_{bt}(n)\| \|\mathbf{p}_{ft}(n)\|}\right).
 \end{equation}
 See Figure~\ref{fig:SetArcLengthDemo} for a graphical description.
@@ -482,7 +482,7 @@ Note that in order for the threshold $\alpha_p$ to be useful, it must be negativ
 \begin{equation}
 	p < 2\rho.
 \end{equation}
-If $p$ becomes too large then the condition in Eq~\ref{eq:Prior2} will always be satisfied, effectively resetting the test. If the rate of change for the IP estimates does not satisfy the conditions described above in Eqs.~\ref{eq:Prior1} and \ref{eq:Prior2} for any samples then the parameters are rejected and recovered via interpolation.
+If $p$ becomes too large then the condition in Eq.~\ref{eq:Prior2} will always be satisfied, effectively resetting the test. If the rate of change for the IP estimates does not satisfy the conditions described above in Eqs.~\ref{eq:Prior1} and \ref{eq:Prior2} for any samples then the parameters are rejected and recovered via interpolation.
 
 In practice the value of $f_{max}$ may not be known. If this is the case then $f_{max}$ should be set to a value that is conservatively high. This will still provide useful thresholds for detecting erroneous phase changes.
 % \subsubsection{Incorrect Amplitude-Frequency Relationship}
@@ -551,7 +551,6 @@ In this section a comparison is made between the instantaneous phase estimates o
     y(n)=r\left(n\right)\cos\left(\phi\left(n\right)\right),
 \end{equation}
 where the frequency increases linearly from $f_{min}$ = 10 Hz at $n=1$ ($t=0$) to $f_{max}$ = 100 Hz at $n=N$. The sampling rate was 5~kHz and the data length was 300~ms such that $N = 15000$. The test signal is shown in Figure~\ref{fig:TestSig}, where $r(1) = 4$ and linearly decreases to $r(N) = 1$. To alleviate problems associated with boundary effects, the first and last 0.02~ms of the signal was discarded so the results were not confounded. Following this, the effective frequency range of the chirp was approximately 16 to 94~Hz. The first IMF of the EMD was used to form the comparison since the signal is noise-free, thus intra-mode mixing was not a problem. In addition, the possibility of $2\pi$ phase wrapping was accounted for when calculating the error.
-
 \begin{figure}[ht]
 	\centering
 	\subfigure[]{
@@ -560,7 +559,7 @@ where the frequency increases linearly from $f_{min}$ = 10 Hz at $n=1$ ($t=0$) t
 	\subfigure[]{	
 		\includegraphics[scale=1]{./Figures/eps/NoiseFreeComparison.eps}
 		\label{fig:ResultsTestSig}}
-	\caption{a) Test signal that was used in the comparisons. The part of the signal shown by the dashed line was discarded so edge effects did not confound results. b) Comparison of the IP estimation accuracy between the CPT and the HT, HHT, NHT and DQ methods. The plot shows the RMSE of the the phase estimates over the duration entire test signal (excluding regions discarded for edge effects).}
+	\caption{a) Test signal that was used in the comparisons. The part of the signal shown by the dashed line was discarded so edge effects did not confound results. The blue vertical lines mark the three time group that were used for the comparison of the CPT to the EEMD when noise was added. b) Comparison of the IP estimation accuracy between the CPT and the HT, HHT, NHT and DQ methods. The plot shows the RMSE of the the phase estimates over the duration entire test signal (excluding regions discarded for edge effects).}
 \end{figure}
 
 For the CPT the arc length was set to $\psi=3\pi/4$ (for consistency with the next section). The results of the comparison are shown in Figure~\ref{fig:ResultsTestSig}. The figure demonstrates that the net performance in terms of the root mean squared error (RMSE) of the IP estimates of the CPT is superior to the other methods for this test signal.
@@ -613,7 +612,7 @@ For the CPT the arc length was set to $\psi=3\pi/4$ (for consistency with the ne
 		\includegraphics[scale=1]{./Figures/eps/CPT_IP_SNR_RMSEe.eps}}
 	\subfigure[]{
 		\includegraphics[scale=1]{./Figures/eps/CPT_IP_SNR_RMSEf.eps}}	
-		\caption{Comparison of the CPT IP estimates to the normalized Hilbert transform incorporating the ensemble empirical mode decomposition for test signal 1 with additive noise. Note; the whiskers show std dev. The red line shows the median, the box cover the data range, except for the outliers shown by red crosses.}
+		\caption{Comparison of the CPT IP estimates to the IP estimates found with the normalized Hilbert transform (NHT) incorporating the ensemble empirical mode decomposition (EEMD) from the test signal with additive noise. The upper row (parts a)-c)) of boxplots shows results from the NHT using the EEMD. The lower row (parts d)-f)) shows the results from the CPT. Each column of boxplots shows the results from a particular time group, where the time groups are shown in Fig.~\ref{fig:TestSig}. On each box, the central mark is the median, the edges of the box are the 25th and 75th percentiles, the whiskers extend to the most extreme data points the algorithm considers to be not outliers, and the outliers are plotted individually as red crosses.}
 		\label{fig:RMSEComparison}
 \end{figure*}
 
@@ -621,58 +620,61 @@ This section demonstrates how the CPT performs with a noisy signal and compares 
 \begin{equation}
     y(t)=r\left(t\right)\cos\left(\phi\left(n\right)\right) + \varepsilon \left( n \right).
 \end{equation}
-where $\varepsilon(n) \sim \mathcal{N}(0,\sigma^2)$. The signal was generated with $9$ different levels of noise where the standard deviation was varied from $0$ to $0.56$ in steps of $0.07$. The angle describing the arc length for the circle fitting was set to $\psi=3\pi/4$. 
+where $\varepsilon(n) \sim \mathcal{N}(0,\sigma^2)$. The signal was generated with $9$ different levels of noise where the standard deviation was varied from $0$ to $0.56$ in steps of $0.07$. The angle describing the arc length for the circle fitting was set to $\psi=3\pi/4$. The choice of the arc length represents a trade-off between dealing with nonstationarities in the signals, where shorter arcs are preferable, and dealing with noise, where longer arcs are preferable. The tangent to the arc, that is used for error checking, was estimated using the points such that $\gamma = \pi/2$ (from Eq.~\ref{eq:TangentArcLength}). This provides the maximum distance between the points that used to estimate the tangent, which helps to prevent errors associated with noise. The parameters of the EEMD were set such that the noise added the each member of the ensemble had a standard deviation of 0.2 (of the original signal) and each ensemble consisted of 100 realizations, as recommended by the authors of the algorithm~\cite{Wu2009}. 
 
-This large arc length was chosen due to the high levels of noise in the test signal. \dean{elaborate}
+The signal was split into $3$ time groups, as indicated by the blue vertical lines on Fig.~\ref{fig:TestSig}, to approximate the signal-to-noise ratio (SNR), since it is time-varying, for benchmarking and comparison. The RMSE of the IP and IA estimates were calculated over 100 realizations of the test signal using the EEMD NHT and the CPT. Note, the 100 realizations used to form the ensemble for EEMD is not to be confused with the 100 realizations of the test signal, where for each realization of the test signal the EEMD uses the average of an ensemble to estimate the signal properties. The calculation of the RMSE for the IP allowed for wrapping between $0$ and $2\pi$, such that the maximum possible error was $\pi$. All IMFs were calculated using the EEMD, since it is unknown which mode corresponds to the signal \emph{a priori}. The IMF of EEMD with lowest RMSE for the middle time group was used for the comparison to be sure that edge effects did not influence the choice of the best IMF corresponding to the signal. 
 
-The tangent of the arc was estimated using the points that mark the boundary of an arc of $\pi$ about the sample of interest. \dean{elaborate}
+The comparison between the IP estimation accuracy of the CPT and EEMD for each of the 9 noise levels is shown in Figure~\ref{fig:RMSEComparison}. The upper row of subfigures shows the results from EEMD and the lower row shows the results from the CPT. The error is expressed as a percentage of the maximum possible error ($\pi$), since we allowed for $2\pi$ wrapping. The figure shows that the CPT yielded better IP estimates for group one and a comparable performance between the methods for the groups two and three. These results illustrate the effectiveness of the CPT for estimating IP in the presence of noise. As the SNR is increased the error in the IP estimate slightly increases. This increase in RMSE is related to the number of parameter estimates that were rejected using the checks described in Section~\ref{sect:DetectingInvalidParameters}, where the interpolation used to to recover rejected IP estimates was not an exact match to the actual values.
 
-The parameters of the EEMD were set such that the noise added the each member of the ensemble had a standard deviation of 0.2 \dean{of the peak?} and each ensemble consisted of 100 realizations, as recommended by the authors of the algorithm~\cite{Wu2009}.
-
-The signal was split into $3$ time groups, in the same manner as the noise free comparison, to approximate the SNR for benchmarking and comparison. The RMSE of the IP and IA estimates were calculated over \dean{100} realizations of the test signal using the EEMD NHT and the CPT. The calculation of the RMSE for the IP allowed for wrapping between $0$ and $2\pi$, such that the maximum possible error is $\pi$. All IMFs were calculated using the EEMD, since we do not know the mode corresponding to the signal \emph{a priori}. The IMF of EEMD with lowest RMSE for the IP estimate for the middle time group was used for the comparison, to be sure the edge effects did not influence the choice of the best IMF corresponding to the signal. 
-
-The comparison of the performance of the IP estimation between both methods for each of the 9 noise levels is shown in the boxplot Figure~\ref{fig:RMSEComparison}. The boxplot was generated using Matlab's boxplot function with the standard settings. The error is expressed as a percentage of the maximum possible error ($\pi$), since we allowed for $2\pi$ wrapping. The figure shows that the CPT yielded better IP estimates for group one and a comparable performance between the methods for the groups two and three. These results illustrate that both methods are capable of distinguishing the signal in the presence of noise. 
-
-The results for the IA estimation are shown in Fig.~\ref{fig:RMSEComparisonSig1_IA}. The error is given as a relative measure with respect to the mean of the actual IA for the respective time periods of each group. For the EEMD, the IA was computed prior to the normalization. The results clearly show the IA estimates of the EEMD are inferior to the CPT. This large errors in the IA estimates for the EEMD are due to the amplitude distortions caused by the iterative sifting process.  
-\begin{figure*}[!ht]\label{fig:RMSEComparisonSig1_IA}
-    \centering
-        \includegraphics[scale=1]{./Figures/IA_RMSE_Sig1.eps}
-    \caption{Comparison of the CPT IA estimates to the normalized Hilbert transform for noisy signals.}
+The results for the IA estimation are shown in Fig.~\ref{fig:RMSEComparisonSig1_IA}. The error is given as a relative measure with respect to the mean of the actual IA for the respective time periods of each group. For the EEMD, the IA was computed prior to the normalization. The results clearly show the IA estimates of the EEMD are inferior to the CPT. The large errors in the IA estimates for the EEMD are due to the amplitude distortions caused by the iterative sifting process.
+\begin{figure*}[ht]
+	\centering
+	\subfigure[]{
+		\includegraphics[scale=1]{./Figures/eps/EEMD_IA_SNR_RMSEa.eps}}
+	\subfigure[]{
+		\includegraphics[scale=1]{./Figures/eps/EEMD_IA_SNR_RMSEb.eps}}
+	\subfigure[]{
+		\includegraphics[scale=1]{./Figures/eps/EEMD_IA_SNR_RMSEc.eps}}
+	\subfigure[]{
+		\includegraphics[scale=1]{./Figures/eps/CPT_IA_SNR_RMSEd.eps}}
+	\subfigure[]{
+		\includegraphics[scale=1]{./Figures/eps/CPT_IA_SNR_RMSEe.eps}}
+	\subfigure[]{
+		\includegraphics[scale=1]{./Figures/eps/CPT_IA_SNR_RMSEf.eps}}	
+		\caption{Comparison of the CPT IA estimates to the IA estimates found with the normalized Hilbert transform (NHT) incorporating the ensemble empirical mode decomposition (EEMD) from the test signal with additive noise. The upper row (parts a)-c)) of boxplots shows results from the NHT using the EEMD. The lower row (parts d)-f)) shows the results from the CPT. Each column of boxplots shows the results from a particular time group, where the time groups are shown in Fig.~\ref{fig:TestSig}. On each box, the central mark is the median, the edges of the box are the 25th and 75th percentiles, the whiskers extend to the most extreme data points the algorithm considers to be not outliers, and the outliers are plotted individually as red crosses.}
+		\label{fig:RMSEComparisonSig1_IA}
 \end{figure*}
-Figure~\ref{fig:IMFNoNHT} shows a histogram of the IMF indexes for each realization of the test signal for the EEMD. The fifth IMF of the EEMD represented the signal for all of the realizations of the first seven noise levels. For the two highest noise levels, there was also some realizations where the sixth IMF was selected. This is due to intra-mode mixing and explains the outliers in the results for the EEMD \dean{Needs explaining}.   
-\begin{figure}[!ht]\label{fig:IMFNoNHT}
-    \centering
-        \includegraphics[scale=1]{./Figures/IMFNoFigSig1.eps}
-    \caption{IMF index corresponding to the signal.}
-\end{figure}
+
+% Figure~\ref{fig:IMFNoNHT} shows a histogram of the IMF indexes for each realization of the test signal for the EEMD. The fifth IMF of the EEMD represented the signal for all of the realizations of the first seven noise levels. For the two highest noise levels, there was also some realizations where the sixth IMF was selected. This is due to intra-mode mixing and explains the outliers in the results for the EEMD \dean{Needs explaining}.   
+% \begin{figure}[!ht]\label{fig:IMFNoNHT}
+%     \centering
+%         \includegraphics[scale=1]{./Figures/IMFNoFigSig1.eps}
+%     \caption{IMF index corresponding to the signal.}
+% \end{figure}
 
 
 % Focusing on the results from the CPT for the first time group, the variance of the IP estimate begins to increase at a SNR of approximately $14$~dB. These errors occur because the minimum arc length is too short given the noise level. When the minimum arc length is too short, the principal axis of the segment is in the direction of the additive noise rather than following the trajectory of the signal. This can be overcome by using a larger arc length and estimating the tangent vector using more samples. However, increasing the minimum segment size would impact negatively on the higher frequency part of the chirp. For the second time group, as noise is increased, errors increase in a systematic way with an approximate inverse linear relationship to the SNR. For this group, the minimum segment size is sufficient to estimate a satisfactory tangent. Errors in the third group, starting from approximate $7$~dB, are because the SNR is too high for the algorithm to work, regardless of the segment size. Together, these results demonstrate that for relatively simple signals the CPT can estimate IP in the presence of mild disturbances. \todo{DG: we need to consider increasing this discussion of the figure.}
 \section{The CPT for Empirical Mode Decomposition}\label{sect:CPTEMDSection}
-For low noise signals, the CPT can be used as an alternative to the sifting process of the EMD. The CPT EMD models the signal as
+For low noise signals, the CPT can be used as an alternative to the sifting process of the EMD. The steps of the CPT EMD algorithm are presented in Algorithm~\ref{CPTEMDAlgorithm} and a graphical description is shown in Fig.~\ref{CPT_EMD}. The CPT EMD models the signal as
 \begin{align}
     y(n) &= x_{0,K}(n) + \sum_{k=1}^{K}x_k(n) + \varepsilon(n) \\
     x_k\left(n\right) &= r_k\left(n\right)\cos\left(\phi_k\left(n\right)\right),
 \end{align}
-where the subscript $k$ indexes the $K$ intrinsic mode functions (IMFs) denoted by $x_k(n)$. The IP, $\phi_k(n)$, for each IMF is estimated using the CPT applied to $y(n)$ (if $k=1$) or $x_{0,k-1}$. In the same manner as the EMD, the IMFs are ordered such that the highest frequency component corresponds to the first mode, $k=1$. In the first IMF, $x_1(n)$, we can consider $x_{0,1}(n)$ as a modulation term. If $x_{0,1}(n)$ also has modulations, then it can be decomposed into an oscillatory term $x_2(n)$ and an offset (another modulating term) $x_{0,2}(n)$. The process can be repeated until all $K$ oscillatory modes are extracted from $y(n)$, leaving the final offset term or residual $x_{0,K}(n)$.
+where the subscript $k$ indexes the $K$ intrinsic mode functions (IMFs) denoted by $x_k(n)$. The IP, $\phi_k(n)$, for each IMF is estimated using the CPT applied to $y(n)$ (if $k=1$) or $x_{0,k-1}(n)$ if (if $k>1$). In the same manner as the EMD, the IMFs are ordered such that the highest frequency component corresponds to the first mode, $k=1$. In the first IMF, $x_1(n)$, we can consider $x_{0,1}(n)$ as a modulation term. If $x_{0,1}(n)$ also has modulations, then it can be decomposed into an oscillatory term $x_2(n)$ and an offset (another modulating term) $x_{0,2}(n)$. The process can be repeated until all $K$ oscillatory modes are extracted from $y(n)$, leaving the final offset term or residual $x_{0,K}(n)$.
 
-As we have demonstrated, the IP and IA can be estimated using the CPT without the requirement of sifting. However, the decomposition also relies on an accurate estimate of the offset, $x_{0,k}(n)$. The estimates of the offset from the circle fitting are generally not good enough to perform the decomposition. This is because there may be small drifts in the estimates that add extra extrema. To overcome this problem, the CPT EMD uses an empirical method for estimating the offset, in a similar fashion to the standard EMD. It should be noted that the monotonic structure of the IP generally enables an good estimate of $\phi(n)$, which is exploited in our approach. 
+As we have demonstrated, the IP and IA can be estimated using the CPT without the requirement of sifting. The decomposition also relies on an accurate estimate of the offset, $x_{0,k}(n)$. The estimates of the offset from the circle fitting are generally not good enough to perform the decomposition, due to small drifts in the estimates that add extra extrema. To overcome this problem, the CPT EMD uses an empirical method for estimating the offset, in a similar fashion to the standard EMD. It should be noted that the monotonic structure of the IP generally enables an good estimate of $\phi(n)$, which is exploited in our approach. 
 
-\dean{define had to get $\phi_k(n)$}
-
-Now, assuming the estimate of the IP is accurate, the offset can be found empirically. To show this we first define the signal
+Since the estimate of the IP is accurate for low noise signals, the offset can be found empirically. To show this we first define the signal
 \begin{equation}
-	\gamma_k(n)=\cos(\phi_k(n)).
+	\zeta_k(n)=\cos(\phi_k(n)).
 \end{equation}   
-The extrema of the oscillatory mode $x_k(n)$ occur at the same times as the extrema of $\gamma_k(n)$. Therefore, the estimation of times where extrema occur only relies on an accurate estimate of $\phi_k(n)$. Now consider a noise free signal $y(n)$. The empirical offset can be estimated by 
+The extrema of the oscillatory mode, $x_k(n)$, occur at the same times as the extrema of $\zeta_k(n)$. Therefore, the estimation of times where extrema occur only relies on an accurate estimate of the IP. Now consider a noise free signal $y(n)$. The empirical offset can be estimated by 
 \begin{equation}
     x_{0,k}(n) = \frac{s_{max,k}(n) + s_{min,k}(n)}{2},
 \end{equation}
-where $s_{max,k}(n)$ is a cubic spline interpolation through points from $y(n)$ (if $k=1$) or $x_{0,k-1}(n)$ (if $k>1$) corresponding to maxima of $\gamma_k(n)$, and $s_{min,k}(n)$ is another cubic spline interpolation through points of $y(n)$ (if $k=1$) or $x_{0,k-1}(n)$ (if $k>1$) corresponding to minima of $\gamma_k(n)$. 
+where $s_{max,k}(n)$ is a cubic spline interpolation through points from $y(n)$ (if $k=1$) or $x_{0,k-1}(n)$ (if $k>1$) corresponding to the maxima of $\zeta_k(n)$, and $s_{min,k}(n)$ is another cubic spline interpolation through points of $y(n)$ (if $k=1$) or $x_{0,k-1}(n)$ (if $k>1$) that correspond to minima of $\zeta_k(n)$. Because the offset is varying on a slower time-scale than the IP, the empirical method provides a good approximation for low noise signals. 
 
-The steps of the CPT EMD algorithm are presented in Algorithm~\ref{CPTEMDAlgorithm} and a graphical description can be seen in Fig.~\ref{CPT_EMD}.
-
-An advantage of the CPT EMD over the HHT is that the IA structure is maintained and the IP estimate is not subject to the nonlocal effects of the interpolation in the sifting process. In addition, as demonstrated in Section~\ref{sect:NoisySignalsSection}, the CPT can estimate the IP in the presence of disturbances thereby alleviating problems from intra-mode mixing. By combining techniques from the HHT and normalized Hilbert transform, an improved and more meaningful EMD is achieved. %This demonstrates the advantage of the CPT EMD method. %An examples of using the CPT with an EEG signal is presented in section~\ref{EEGExampleSection}.
+In the standard HHT EMD the offset $x_{0,1}(n)$ is approximated by the average of the splines through the extrema of $y(n)$. On the other hand in the CPT EMD, the splines that are averaged to estimate of the empirical offset are formed using points in $y(n)$ that correspond to extrema of $x_1(n)$. An advantage of the CPT EMD over the HHT EMD is that the IA structure is maintained and the IP estimate is not subject to the nonlocal effects of the interpolation in the sifting process. As demonstrated in Section~\ref{sect:NoisySignalsSection}, the CPT can estimate the IP in the presence of disturbances thereby alleviating problems from intra-mode mixing. Furthermore, the first mode of CPT EMD will correspond to signal and not noise, as it would in the EEMD. By combining techniques from the HHT and normalized Hilbert transform, an improved and more meaningful EMD is achieved. %This demonstrates the advantage of the CPT EMD method. %An examples of using the CPT with an EEG signal is presented in section~\ref{EEGExampleSection}.
 % 
 \begin{figure}
 \centering
