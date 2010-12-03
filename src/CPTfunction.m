@@ -21,7 +21,13 @@
 % if the cpt is used in an emd than it is handy to make zeta bigger for
 % slower time scales
 
-function [x0 Hx0 foundarc phi phi_unwrapped r t firstindex lastindex ArcPoints TangentPoints] = CPTfunction(y, t, Ts, psi, f_max,init_b_f,zeta)
+% start_index_offset and end_index_offset
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% this is used with the CPT EMD so the decomp doesn't have to deal with zeros around the edges
+
+
+function [x0 Hx0 foundarc phi phi_unwrapped r firstindex lastindex ArcPoints TangentPoints] ...
+    = CPTfunction(y, Ts, psi, f_max,init_b_f,zeta,start_index_offset,end_index_offset)
 
 % ploton = true;
 ploton = false;
@@ -52,7 +58,9 @@ init_b = init_b_f;                      % the number of samples from the point o
 init_f = init_b_f;      
 
 % cycle through all samples to find circle fits
-for n=init_b(1)+1:NSamples - init_f(1)-zeta
+time_series_start_sample = init_b(1)+1+start_index_offset;
+time_series_end_sample = NSamples - (init_f(1)+zeta+end_index_offset);
+for n=time_series_start_sample:time_series_end_sample
     
     if ~SampleForwardBackFlag               % this means we have had to look too far to find an arc, so we stop. If we dont reset the flag we dont go into the while loop.
         flag = false;                                                                   % initialize / reset arc length indicator flag, this flag tells us when to get out of the while loop below
@@ -71,7 +79,7 @@ for n=init_b(1)+1:NSamples - init_f(1)-zeta
         
      % if we are not within range check if we are over the edge and make
      % the size of the arc as large as possible
-    elseif (n+init_f(n)  >= NSamples)
+    elseif ((n+init_f(n)+end_index_offset)  >= NSamples)
         b_t_final = floor((NSamples - n)/2)-1;
         f_t_final = b_t_final;
         flag = true;                    % we don't need to go through the loop because we at an edge
@@ -113,7 +121,6 @@ for n=init_b(1)+1:NSamples - init_f(1)-zeta
             disp('error')                           % for checking, make sure we dont go over edge of time series
         end
         
-
         % check if the 
         if DistBack <= DistForward
 
@@ -408,7 +415,7 @@ if ~SampleForwardBackFlag
     phi_unwrapped = unwrap_phi(phi) - pi;
 
     % interpolate missing values
-    [IF_interp phi r t firstindex lastindex] = interpolate_IP_IA_and_IF(phi_unwrapped,r,t,Ts);
+    [IF_interp phi r firstindex lastindex] = interpolate_IP_IA_and_IF(phi_unwrapped,r,Ts);
 else
     firstindex = 1; 
     lastindex = size(ArcPoints,2);

@@ -18,12 +18,12 @@ clc
 
 Fs = 1e3;                               % samples/second
 Ts = 1/Fs;                              % sample period (radians)
-Duration = 3;                         % seconds
+Duration = 1;                         % seconds
 NSamples = Duration*Fs;
-t{1} = linspace(0,Duration,NSamples);
+t = linspace(0,Duration,NSamples);
 
-f1 = 7;                    Theta1 = 2*pi*f1*t{1};                % frequency Hz
-f2 = 13;                  Theta2 = 2*pi*f2*t{1};
+f1 = 7;                    Theta1 = 2*pi*f1*t;                % frequency Hz
+f2 = 17;                  Theta2 = 2*pi*f2*t;
 f_max = 1*f2;
 
 alpha = 1;
@@ -77,32 +77,28 @@ m=1;
 InitialArcSamples = 20;                                   % Number of samples in the first try to find the 'DesiredArcLength'
 init_b_f = InitialArcSamples*ones(1,NSamples);
 zeta = 1;
-
+start_index_offset = 0;
+end_index_offset = 0;
 % run emd
 while foundarc
     
-%     figure
-%     plot(init_b_f)
-%     drawnow
-    tic
-    [foundarc phi{m} phi_unwrapped{m} r{m} t{m} firstindex lastindex  ArcPoints TangentPoints] = CPTfunction(res{m}, t{m}, Ts, psi, f_max, init_b_f,zeta);
+    tic 
+    [x0 Hx0 foundarc phi{m} phi_unwrapped r{m} firstindex lastindex ArcPoints TangentPoints] ...
+        = CPTfunction(res{m}, Ts, psi, f_max, init_b_f, zeta, start_index_offset, end_index_offset);
     toc
-    zeta = 1.3*zeta;
-    temp = res{m};
-    res{m} = temp(firstindex:lastindex);            % now res is the same length as t
-    
+    zeta = 1.3*zeta;        % this changes the step size of b and f when finding the arc and tangent
+
     if foundarc
         
         % find the detrending line
         cos_phi = cos(phi{m});
         p1 = findpeaks(cos_phi);        % indexes for maxima
         p2 = findpeaks(-cos_phi);       % indexes for minima
-    %     p3 = sort([p1 p2]);
         
         if (length(p1) < 2) || (length(p2) < 2)
             foundarc  = false;
         else
-            if p1(1) > p2(1);
+            if p1(1) > p2(1);           % check which extrema comes first
                 min_index = p1(1);
             else
                 min_index = p2(1);
@@ -116,12 +112,20 @@ while foundarc
             
             spline_index = min_index:max_index;
 
+            % these values make it so the estimation
+            start_index_offset = min_index;
+            end_index_offset = NSamples-max_index;
+            
             if length(spline_index) < 2
                 foundarc  = false;
             else
                 
+                % find the points in the signal that correspond to the
+                % maxima of x
                 maxima = res{m};
                 maxima = maxima(p1);
+                
+                % now for the minima
                 minima = res{m};
                 minima = minima(p2);
 
@@ -129,25 +133,20 @@ while foundarc
                 s2 = spline(p2,minima,1:length(res{m}));
 
                 m=m+1;
+                
+                emperical_offset = (s1+s2)/2; 
 
-                res{m} = (s1(spline_index)+s2(spline_index))/2;        % this is the residue or the detrending line
+                % now set the samples to zero that are before the extrema
+                emperical_offset(1:min_index-1) = 0;
+                emperical_offset(max_index+1:end) = 0;
+                                
+                res{m} = emperical_offset;        % this is the residue or the detrending line
                 NSamples = length(res{m});
-                t_temp = t{m-1};
-                t{m} = t_temp(spline_index);                    % t is shrunk according to the spline indexes
-                
-%                 temp = res{m-1};
-%                 temp = temp(spline_index);
-%                 r_hat{m-1} = abs(temp-res{m});
-%                 temp = phi{m-1};
-%                 temp = temp(spline_index);
-%                 phi_hat{m-1} = temp;
-%                 temp = t{m-1};
-%                 t_hat{m-1} = temp(spline_index);
-                
+
                 % here we cut down the edges of the arcs the define the bit
                 % we fit the circle to and the tangent
-                temp = [ArcPoints(:,spline_index); TangentPoints(:,spline_index)];
-                init_b_f  = min(temp,[],1);
+%                 temp = [ArcPoints(:,spline_index); TangentPoints(:,spline_index)];
+%                 init_b_f  = min(temp,[],1);
                 
                 % ~~~~~~~~~~~
                 figure
@@ -155,17 +154,13 @@ while foundarc
                 hold on
                 plot(p1,maxima,'g.')
                 plot(p2,minima,'r.')
-                plot(spline_index,s1(spline_index),'k')
-                plot(spline_index,s2(spline_index),'k')        
-                plot(spline_index,res{m},'c')
+                plot(s1,'k')
+                plot(s2,'k')        
+                plot(res{m},'c')
                 hold off
                 drawnow
-                %  ~~~~~~~~~~~~~~
-                
-%                 figure
-%                 plot(phi{m-1})
-%                 ylabel(['\phi_' num2str(m) '(n)'])
                 % ~~~~~~~~~~~~~~~
+                
             end
         end
     end
@@ -181,11 +176,11 @@ end
 % end
 
 figure
-subplotmax = 1;
+subplotmax = 3;
 for n=1:subplotmax
     
     subplot(subplotmax,1,n)
-    plot(t{n},r{n}.*cos(phi{n})),hold on
-    plot(t{n},res{n},'r')
+    plot(t,r{n}.*cos(phi{n})),hold on
+    plot(t,res{n},'r')
     hold off
 end
