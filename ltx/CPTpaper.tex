@@ -644,19 +644,19 @@ For low noise signals, the CPT can be used as an alternative to the sifting proc
     y(n) &= x_{0,K}(n) + \sum_{k=1}^{K}x_k(n) + \varepsilon(n) \\
     x_k\left(n\right) &= r_k\left(n\right)\cos\left(\phi_k\left(n\right)\right),
 \end{align}
-where the subscript $k$ indexes the $K$ intrinsic mode functions (IMFs) denoted by $x_k(n)$. The IP, $\phi_k(n)$, for each IMF is estimated using the CPT applied to $y(n)$ (if $k=1$) or $x_{0,k-1}(n)$ (if $k>1$). In the same manner as the EMD, the IMFs are ordered such that the highest frequency component corresponds to the first mode, $k=1$. In the first IMF, $x_1(n)$, we can consider $x_{0,1}(n)$ as a modulation term. If $x_{0,1}(n)$ also has modulations, then it can be decomposed into an oscillatory term $x_2(n)$ and an offset (another modulating term) $x_{0,2}(n)$. The process is repeated until all $K$ oscillatory modes are extracted from $y(n)$, leaving the final offset term or residual $x_{0,K}(n)$. The stopping criteria is such that the decomposition is complete when an arc of the specified length can no longer be found.
+where the subscript $k$ indexes the $K$ intrinsic mode functions (IMFs) denoted by $x_k(n)$. The IP, $\phi_k(n)$, is estimated for each IMF using the CPT applied to $y(n)$ (if $k=1$) or the estimated offset, $\hat{x}_{0,k-1}(n)$ (if $k>1$). In the same manner as the EMD, the IMFs are ordered such that the highest frequency component corresponds to the first mode, $k=1$. In the first IMF we can consider $x_{0,1}(n)$ as a modulation term. If $x_{0,1}(n)$ also has modulations, then it can be decomposed into an oscillatory term $x_2(n)$ and an offset (another modulating term) $x_{0,2}(n)$. The process is repeated until all $K$ oscillatory modes are extracted from $y(n)$, leaving the final offset term or residual $x_{0,K}(n)$. The decomposition is complete when an arc of a specified length can no longer be found ($b$ or $f$ become too large) or the amplitude of $x_{0,k}(n)$ becomes too low with respect to $y(n)$.
 
 \begin{algorithm}[ht]
 \caption{The CPT for EMD}\label{CPTEMDAlgorithm}
 \begin{algorithmic}[1]
 \State $k=1$
 \State use CPT from Algorithm~\ref{CPTAlgorithm} to estimate $\phi_k(n)$ from $y(n)$
-\State find local extrema of $\cos\left(\phi_k(n)\right)$
+\State find local extrema of $\cos\left(\hat\phi_k(n)\right)$
 \State use extrema to form the splines $s_{min,k}(n)$ and $s_{max,k}(n)$
-\State calculate $x_{0,k}(n) = 0.5\left(s_{min,k}(n) + s_{max,k}(n)\right)$
+\State calculate $\hat{x}_{0,k}(n) = 0.5\left(s_{min,k}(n) + s_{max,k}(n)\right)$
 \While { an arc specified by $\psi$ is found }
     \State $k=k+1$
-    \State perform CPT on $x_{0,k-1}(n)$ to estimate $\phi_{k}(n)$
+    \State perform CPT on $\hat{x}_{0,k-1}(n)$ to estimate $\phi_{k}(n)$
     \State repeats steps 3 to 5 to approximate parameters
 \EndWhile
 \end{algorithmic}
@@ -674,29 +674,35 @@ where the subscript $k$ indexes the $K$ intrinsic mode functions (IMFs) denoted 
 	\label{fig:CPT_EMD}
 \end{figure}
 
-% \begin{figure}
-% \centering
-% \includegraphics[scale=0.42]{./Figures/CPT_EMD_demo.eps}
-% \caption[CPT_EMD]{\textbf{A.} The test signal (blue) with the interpolated maxima and minima lines (green and cyan respectively) and points corresponding the extrema of $\cos\left(\phi_1(n)\right)$. \textbf{B.} The absolute value of the test signal demodulated by the empirical offset $x_{0,1}(n)$ (blue), the empirical IA estimate $r_{1}(n)$ (green), and the samples corresponding to extrema of $\cos\left(\phi_1\left(n\right)\right)$ (red). \textbf{C.} The first IMF of the CPT EMD decomposition $\tilde{r}_1(n)\cos\left(\phi_1\left(n\right)\right)$. Note the empirical offset goes through the points of inflection at $1.25 s$ and $1.75s$, where these points were missed on the first iteration of the sifting process. When comparing the IMF in C. to Fig.~\ref{fig:HHTDemo} D. we can see CPT EMD is superior in preserving the structure of the IA estimate for the decomposition.}
-% \label{CPT_EMD}
-% \end{figure}
+The IP and IA can be estimated using the CPT without the requirement of sifting. However, the decomposition also relies on an accurate estimate of the offset, $x_{0,k}(n)$. The estimates of the offset from the circle fitting are generally not good enough to perform the decomposition, due to small drifts that add extra extrema. To overcome this problem, the CPT EMD uses an empirical method for estimating the offset that is similar to the standard EMD. It should be noted that the monotonic structure of the IP enables a good estimates of $\phi(n)$, which is exploited in our approach. 
 
-The IP and IA can be estimated using the CPT without the requirement of sifting. The decomposition also relies on an accurate estimate of the offset, $x_{0,k}(n)$. The estimates of the offset from the circle fitting are generally not good enough to perform the decomposition, due to small drifts that add extra extrema. To overcome this problem, the CPT EMD uses an empirical method for estimating the offset that is similar to the standard EMD. It should be noted that the monotonic structure of the IP enables a good estimates of $\phi(n)$, which is exploited in our approach. 
-
-Since the estimate of the IP is accurate for low noise signals, the offset can be found empirically. To show this, we first define the signal
+To show how $x_{0,k}(n)$ can be can be estimated using $\hat\phi_k(n)$, we first define
 \begin{equation}
-	\varsigma_k(n)=\cos(\phi_k(n)).
+	\varsigma_k(n)=\cos(\hat{\phi}_k(n)).
 \end{equation}   
-The extrema of the oscillatory mode, $x_k(n)$, occur at the same times as the extrema of $\zeta_k(n)$. Therefore, the times where extrema occur only rely on an accurate estimate of the IP. Now consider a noise free signal, $y(n)$. The empirical offset can be estimated by 
+The extrema of the oscillatory mode, $\hat{x}_k(n)$, occur at the same times as the extrema of $\zeta_k(n)$. Therefore, knowledge of the times where extrema occur in the oscillatory mode only rely on an accurate estimate of the IP. Now consider a noise free signal, $y(n)$. The empirical offset can be estimated by 
 \begin{equation}
-    x_{0,k}(n) = \frac{s_{max,k}(n) + s_{min,k}(n)}{2},
+    \hat{x}_{0,k}(n) = \frac{s_{max,k}(n) + s_{min,k}(n)}{2},
 \end{equation}
-where $s_{max,k}(n)$ is a cubic spline interpolation through points from $y(n)$ (if $k=1$) or $x_{0,k-1}(n)$ (if $k>1$) corresponding to the maxima of $\varsigma_k(n)$, and $s_{min,k}(n)$ is another cubic spline interpolation through points of $y(n)$ (if $k=1$) or $x_{0,k-1}(n)$ (if $k>1$) that correspond to minima of $\varsigma_k(n)$. Because the offset is varying on a slower time-scale than the IP, the empirical method provides a good approximation for low noise signals. 
+where $s_{max,k}(n)$ is a cubic spline interpolation through points from $y(n)$ (if $k=1$) or $\hat{x}_{0,k-1}(n)$ (if $k>1$) corresponding to the maxima of $\varsigma_k(n)$, and $s_{min,k}(n)$ is another cubic spline interpolation through points of $y(n)$ (if $k=1$) or $\hat{x}_{0,k-1}(n)$ (if $k>1$) that correspond to minima of $\varsigma_k(n)$. Because the offset is varying on a much slower time-scale than the IP, the empirical method provides a good approximation for low noise signals. If the amplitude of the offset is larger than the noise at the extrema of $y(n)$ or $\hat{x}_{0,k-1}(n)$, then the extrema of $\hat{x}_{0,k}(n)$ occur at the correct locations.
 
-In the standard HHT EMD, the offset, $x_{0,1}(n)$, is approximated by the average of the splines through the extrema of $y(n)$. In contrast, the splines for the CPT EMD are formed using points in $y(n)$ that correspond to extrema of $x_1(n)$. This provides an empirical estimate of the offset without the need for sifting. An advantage of the CPT EMD over the HHT EMD is that the IA structure is maintained and the IP estimate is not influenced by nonlocal effects of the interpolation in the sifting process. As demonstrated in Section~\ref{sect:NoisySignalsSection}, the CPT can estimate the IP in the presence of disturbances thereby alleviating problems from intra-mode mixing. Furthermore, the first mode of CPT EMD will correspond to the signal, not noise as it would in the EEMD. By combining ideas from the HHT and the CPT an improved and more meaningful EMD is achieved. %This demonstrates the advantage of the CPT EMD method. %An examples of using the CPT with an EEG signal is presented in section~\ref{EEGExampleSection}.
+In the standard HHT EMD, the offset, $x_{0,1}(n)$, is approximated by the average of the splines through the extrema of $y(n)$. In contrast, the splines for the CPT EMD are formed using points in $y(n)$ that correspond to extrema of $\hat{x}_1(n)$. This provides an empirical estimate of the offset without the need for sifting. 
+
+Given the empirical offset, an empirical estimate of the IA can also be formed. To show this we define
+\begin{equation}
+	\hat{x}_k(n) = \left\{ \begin{array}{ll}
+		y(n)-\hat{x}_{0,k}(n) & , k=1 \\
+		\hat{x}_{0,k-1}(n)-\hat{x}_{0,k}(n) & , k>1 
+		\end{array}\right.
+\end{equation}
+and empirical IA is calculated by
+\begin{equation}
+	\hat{r}_k(n) = \sqrt{(\hat{x}^2_k(n) + \mathcal{H}\hat{x}^2_k(n))}.
+\end{equation} 
+The empirical IA will typically be smoother than the IA estimate from the circle fit. 
+ 
+An advantage of the CPT EMD over the HHT EMD is that the IA structure is maintained and the IP estimate is not influenced by nonlocal effects of the interpolation in the sifting process. As demonstrated in Section~\ref{sect:NoisySignalsSection}, the CPT can estimate the IP in the presence of disturbances thereby alleviating problems from intra-mode mixing. By combining ideas from the HHT and the CPT an improved and more meaningful EMD is achieved. %This demonstrates the advantage of the CPT EMD method. %An examples of using the CPT with an EEG signal is presented in section~\ref{EEGExampleSection}.
 % 
-
-
 
 
 % \begin{figure*}
@@ -795,27 +801,15 @@ In the standard HHT EMD, the offset, $x_{0,1}(n)$, is approximated by the averag
 %     \label{fig:EEGdecomp}
 % \end{figure}
 
-\section{Discussion}\label{sect:DiscussionSection}
+\section{Discussion and Conclusion}\label{sect:DiscussionSection}
 
+The circular model of the CPT provides an intuitive description of the signal's phase-plane dynamics. The model also allows for the introduction of the disturbance term, enabling noise to be dealt with in a consistent manner. Furthermore, circle fitting methods provide statistically optimal parameter estimates~\cite{Al-Sharadqah2009}. An advantage of the CPT EMD over the EEMD is that noise does not appear as one of the extracted oscillatory modes. Therefore, unlike the EEMD, the CPT can be used in unsupervised analyses. %In addition, the circular model enforces a quadrature structure to the analytic representation of the signal, thereby over coming the limitations introduced by the Nutall theorem. %An alternative to fitting circles in the phase plane would be to fit sinusoids to windows of the signal. However, this is more difficult because there is more parameters to estimate. 
 
+% Phase synchronization of EEG signals is an important and expanding area of neuroscientific research, and has been used to study various forms of cognitive neurodynamics and disease~\cite{Varela2001}. The frequency properties of the brain are nonstationary, therefore the CPT may be applied to this exciting area of research. Estimating the relationship between IF and IA properties is important in nonlinear identification, particularly systems described by nonlinear oscillators. Since the CPT can estimate the IA our new method may lead to new advancements in this area.
+ 
+Successful implementation of the CPT requires high sampling rates and high signal-to-noise ratios. Nevertheless, good results can be achieved with careful data acquisition and appropriate pre-processing. For accurate results, sampling rates should provide an over-sampling parameter greater or equal to four (four samples in a semi-circle). In the current implementation of the algorithm, errors are unavoidable at phase-plane cusps. These errors can be detected using our proposed methodology and the incorrect IP estimates around the point of a cusp can be recovered accurately by interpolation, since the unwrapped phase is monotonically increasing in time. The IP estimates can then be used to recover the other parameters empirically that are varying on a slower time-scale. 
 
-\dean{Brief Summary}
-We have presented a new method for estimation of instantaneous properties of nonstationary oscillatory signals. The CPT can be applied to many areas are signal processing and engineering where the HHT has been previously used. At the time of publishing the original HHT algorithm had been widely cited demonstrating the wide applicability. 
-
-\dean{Why it is so good}
-The circular model of the signal in the phase-plane provides an intuitive representation of the signal. Furthermore, the use of this model allows for the introduction of the disturbance term, enabling noise to be dealt with in a consistent manner. \dean{Furthermore, the circle fitting methods can deal with noise in a statistically optimal manner.. Rau Cramer lower bound...} The EEMD can deal with noise however, the oscillatory modes need to be sorted from the modes with corresponding to noise. Therefore, unlike the CPT EMD, the EEMD can not be used in unsupervised analyses. In addition, the circular model enforces a quadrature structure to the analytic representation of the signal, thereby over coming the limitations introduced by the Nutall theorem. An alternative to fitting circles in the phase plane would be to fit sinusoids to windows of the signal. However, this is more difficult because there is more parameters to estimate. 
-
-\dean{Some applications..}
-Fourier basis is an infinite number of freqs, where here we can account for a signal with just a few.
-
-
-\dean{Some limitations}
-Successful implementation of the CPT requires high sampling rates and high SNRs. $\rho \ge 4$ if $\psi = \pi$. Ideally the sampling rate should be high enough to give an over-sampling parameter of ten.
-
-In addition, in the current implementation of the algorithm, errors are unavoidable at phase-plane cusps. Nevertheless, signal properties can be recovered by interpolation These short comings can be addressed through careful data acquisition and appropriate pre-processing \dean{... such as??}. Also, the arc length for the circle fit must be chosen carefully. For noisy signals the arc length is a critical parameter and should be set sufficiently large to overcome the noise. 
-
-\dean{Future work}
-Further work should be directed to improving estimates around phase-plane cusps, finding improved circle fitting algorithms and further developing criteria to only include circle estimates that best describe the instantaneous properties of signals.
+Future work should be directed towards finding an optimal choice for the arc length used to fit the circles. This is an important parameter of the algorithm, where for noisy signals it should be set sufficiently large, and for fast changing signals sufficiently small. Other further work should be directed to improving estimates around phase-plane cusps, finding improved circle fitting algorithms, and further developing methods for constraining parameter estimates that best describe the instantaneous properties of signals.
 
 % \begin{itemize}
 %   \item Conditions - most signals will satisfy, interpretation.. measurement
@@ -827,8 +821,7 @@ Further work should be directed to improving estimates around phase-plane cusps,
 % \end{itemize}
 
 \section{Conclusion}\label{sect:ConclusionSection}
-We have presented a new method for estimating instantaneous amplitude, phase, and frequency from nonlinear, nonstationary signals. This new approach extends the concepts introduced by Hilbert Huang transform by providing a more local estimate of the instantaneous phase. By modeling the trajectory of the signal in the phase-plane as an arc of a circle, the circular phase transform provides an intuitive representation of the signal and deals with noise in a consistent manner. We have demonstrated how our method can be incorporated into the empirical mode decomposition allowing for a meaningful estimates of the instantaneous amplitude of intrinsic mode functions. The CPT can be applied to a wide range of signal processing problems, such as nonlinear system identification, speech processing, EEG analysis etc., where the HHT has been used. 
-
+We have presented a new method for estimating instantaneous amplitude, phase, and frequency from nonlinear, nonstationary signals. This new approach extends the concepts introduced by Hilbert-Huang transform by providing a more local estimates of the instantaneous phase. We have demonstrated how this new method can be incorporated into the empirical mode decomposition allowing for meaningful estimates of the instantaneous amplitude of intrinsic mode functions. The CPT can be applied to a wide range of signal processing and engineering applications, such as nonlinear system identification, structural health monitoring, speech processing, EEG analysis etc., where the HHT has been used. The original HHT algorithm had been widely cited demonstrating the wide applicability. 
 
 % The results for the second test signal are shown in Figure~\ref{fig:RMSEComparisonSig2}. 
 % \begin{figure*}[!ht]\label{fig:RMSEComparisonSig2}
