@@ -285,7 +285,6 @@ for n=time_series_start_sample:time_series_end_sample
     a(:,n) = [Tangent(2,n) ; -Tangent(1,n)];      % normal to the tangent
 
     XY = [y_s ; Hy_s]';                                                % segment in matrix so we can use the circle fit
-
     Par = CircleFitByTaubin(XY);                    % Nonlinear. from Mathworks online. Uses LMS fit
 %     Par = CircleFitByPratt(XY);                    % Nonlinear. from Mathworks online. Uses LMS fit
 
